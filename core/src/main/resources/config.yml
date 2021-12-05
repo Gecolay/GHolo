@@ -1,0 +1,26 @@
+Lang:
+
+  # Defines the Plugin-Language
+  lang: en_en
+
+
+
+Options:
+
+  # Checks if a new Update was released
+  check-for-update: true
+
+  # Defines the space between the top part of two rows
+  space-between-lines: 0.26
+
+  # Defines whether the Plugin should use ArmorStands or EffectClouds to create Holos
+  # ArmorStands render up to 64 Blocks | EffectClouds render up to 40 Blocks
+  # This Option has no effect on the server performance
+  # If there are too many Holos the FPS of a Player can break down, then it makes sense to use EffectClouds
+  use-armor-stands: true
+
+  # Defines a List of Unicode Symbols, which are to be converted within Holo rows
+  Symbols:
+
+    "[X]": "\u2588"
+    "[|]": "\u23B9"
