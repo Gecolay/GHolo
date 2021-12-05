@@ -62,7 +62,7 @@ public class HoloManager {
     	
     	holos.put(Id.toLowerCase(), h);
     	
-    	getSpawnManager().registerHolo(h);
+    	if(L != null && L.getWorld() != null) getSpawnManager().registerHolo(h);
     	
     }
     
@@ -211,7 +211,7 @@ public class HoloManager {
 				
 			}
 			
-		}.runTaskLater(GPM, 1);
+		}.runTaskLaterAsynchronously(GPM, 3);
 		
     }
     
