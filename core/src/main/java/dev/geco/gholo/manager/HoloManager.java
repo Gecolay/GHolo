@@ -20,19 +20,7 @@ public class HoloManager {
     	
     	GPM = GHoloMain;
 
-		if(NMSManager.isNewerOrVersion(17, 0)) {
-
-			try {
-
-				Class<?> sm = Class.forName("dev.geco.gholo.mcv." + NMSManager.getPackageVersion() + ".HoloSpawnManager");
-
-				spawnmanager = (IHoloSpawnManager) sm.getConstructor(GPM.getClass()).newInstance(GPM);
-
-			} catch(Exception e) { e.printStackTrace(); }
-
-		}
-
-		if(spawnmanager == null) spawnmanager = new HoloSpawnManager(GPM);
+		spawnmanager = NMSManager.isNewerOrVersion(17, 0) ? (IHoloSpawnManager) NMSManager.getPackageObject("gholo", "manager.HoloSpawnManager", GPM) : new HoloSpawnManager(GPM);
 
     }
     

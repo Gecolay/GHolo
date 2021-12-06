@@ -1,4 +1,4 @@
-package dev.geco.gholo.mcv.v1_17_R1_2;
+package dev.geco.gholo.mcv.v1_18_R1.manager;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_17_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -98,139 +98,139 @@ public class HoloSpawnManager implements IHoloSpawnManager {
             			if(lc.length > 1) try { it.setTag(TagParser.parseTag(lc[1])); } catch(Error | Exception e1) { }
 
             			o = new ItemEntity(w, H.getLocation().getX(), H.getLocation().getY() - hh, H.getLocation().getZ(), it);
-            			
+
             			u = false;
 
             		} else if(r.startsWith(Values.ENTITY_LINE_TEXT)) {
-            			
+
             			String[] lc = r.replace(Values.ENTITY_LINE_TEXT, "").split(" ", 2);
 
             			Optional<EntityType<?>> m = EntityType.byString(lc[0].toLowerCase());
-            			
+
             			if(m.isPresent()) {
-            				
+
             				q = m.get().create(w);
-            				
+
             				if(lc.length > 1) try { q.load(TagParser.parseTag(lc[1])); } catch(Error | Exception e1) { }
-            				
+
             				q.setNoGravity(true);
             				q.setPos(H.getLocation().getX(), H.getLocation().getY() - hh, H.getLocation().getZ());
-            				
+
             				u = true;
-            				
+
             			}
-            			
+
             		}
-        			
+
         		} catch(IllegalArgumentException e) { }
-        		
+
         		c.setPos(H.getLocation().getX(), H.getLocation().getY() - hh - (GPM.getCManager().USE_ARMOR_STANDS ? 0 : 0.5) - (o == null ? 0.08 : 0), H.getLocation().getZ());
-				
+
         		z.add(new HoloRow(i, u, c, o, q));
-        		
+
         		hh += GPM.getCManager().SPACE_BETWEEN_LINES;
-        		
+
         	}
-        	
+
         	H.setMidLocation(H.getLocation().clone().subtract(0, hh / 2, 0));
-        	
+
         	H.clearUUIDs();
-        	
+
         	holos.put(H, z);
-    		
+
     	} catch(Exception e) {
-    		
+
     		e.printStackTrace();
-    		
+
     	}
-    	
+
     }
-    
+
     public void unregister() {
-    	
+
     	Iterator<Holo> z = holos.keySet().iterator();
-    	
+
     	while(z.hasNext()) {
     		unregisterHolo(z.next(), false);
     		z.remove();
     	}
-    	
+
     }
-    
+
     public void unregisterHolo(Holo H, boolean re) {
-    	
+
     	if(holos.containsKey(H)) {
-    		
+
     		for(HoloRow sh : holos.get(H)) {
 
 				ClientboundRemoveEntitiesPacket r = new ClientboundRemoveEntitiesPacket(sh.getBase().getId());
 
 				ClientboundRemoveEntitiesPacket r2 = sh.getTop() != null ? new ClientboundRemoveEntitiesPacket(sh.getTop().getId()) : null;
-    			
+
     			for(UUID u : H.getUUIDs()) {
-    				
+
     				Player t = Bukkit.getPlayer(u);
-    				
+
     				if(t != null && t.isOnline()) {
 
 						ServerPlayer tc = (ServerPlayer) NMSManager.getNMSCopy(t);
-    					
+
     					if(r2 != null) tc.connection.send(r2);
 
 						tc.connection.send(r);
-    					
+
     				}
-    				
+
     			}
-    			
+
     		}
-    		
+
         	if(re) holos.remove(H);
-        	
+
     	}
-    
+
     }
-    
+
     private Set<Player> getNearPlayers(Location L, double R) {
         Set<Player> pl = new HashSet<>();
         L.getWorld().getPlayers().stream().filter(o -> L.distance(o.getLocation()) <= R).forEach(pl::add);
         return pl;
     }
-    
+
     private Set<Player> getNearPlayers(Location L, double R, String Condition) {
         Set<Player> pl = new HashSet<>();
         L.getWorld().getPlayers().stream().filter(o -> L.distance(o.getLocation()) <= R && GPM.getHoloConditionManager().checkCondition(Condition, o)).forEach(pl::add);
         return pl;
     }
-    
+
     public void spawn() {
-    	
+
     	try {
-    		
+
     		for(Entry<Holo, List<HoloRow>> h : holos.entrySet()) {
-        		
+
         		Holo holo = h.getKey();
-        		
+
         		if(holo.getRange() == 0) continue;
-        		
+
         		int ra = holo.getRange() == -1 ? GPM.getCManager().USE_ARMOR_STANDS ? 64 : 40 : holo.getRange();
-        		
+
         		Set<Player> o = (holo.getCondition() != null ? getNearPlayers(holo.getMidLocation(), ra, holo.getCondition()) : getNearPlayers(holo.getMidLocation(), ra));
-        		
+
         		List<Player> rl = new ArrayList<>();
-        		
+
         		for(UUID u : holo.getUUIDs()) {
-    				
+
     				Player t = Bukkit.getPlayer(u);
-    				
+
     				if(t != null && !o.contains(t)) rl.add(t);
-    				
+
     			}
-        		
+
         		for(HoloRow sh : h.getValue()) {
-        			
+
         			String row = holo.getContent().get(sh.getRow());
-        			
+
         			for(Player t : o) {
 
         				if(!t.isOnline()) continue;
@@ -238,25 +238,25 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 						ServerPlayer tc = (ServerPlayer) NMSManager.getNMSCopy(t);
 
         				if(!holo.getUUIDs().contains(t.getUniqueId())) {
-        					
+
         					String text = GPM.getFormatUtil().formatSymbols(row);
-        					
+
         					if(sh.needUpdate()) text = GPM.getFormatUtil().formatPlaceholders(text, t);
-        					
+
         					text = GPM.getMManager().getGradientMessage(text);
-        					
+
         					sh.getBase().setCustomNameVisible(sh.getTop() == null && !text.equalsIgnoreCase(Values.EMPTY_LINE_TEXT));
 
         					try { sh.getBase().setCustomName(CraftChatMessage.fromString(text)[0]); } catch (Exception e) { }
 
 							ClientboundAddEntityPacket pa = new ClientboundAddEntityPacket(sh.getBase());
-        					
+
         					tc.connection.send(pa);
 
 							ClientboundSetEntityDataPacket pa2 = new ClientboundSetEntityDataPacket(sh.getBase().getId(), sh.getBase().getEntityData(), true);
 
 							tc.connection.send(pa2);
-        					
+
         					if(sh.getTop() != null) {
 
 								ClientboundAddEntityPacket pa3 = new ClientboundAddEntityPacket(sh.getTop());
@@ -266,43 +266,43 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 								ClientboundSetEntityDataPacket pa4 = new ClientboundSetEntityDataPacket(sh.getTop().getId(), sh.getTop().getEntityData(), true);
 
 								tc.connection.send(pa4);
-            					
+
             					if(sh.getItem() != null) {
-            						
+
             						sh.getItem().startRiding(sh.getBase());
 
 									ClientboundSetPassengersPacket pa5 = new ClientboundSetPassengersPacket(sh.getBase());
 
 									tc.connection.send(pa5);
-            						
+
             					}
-        						
+
         					}
-        					
+
         				} else if(sh.needUpdate()) {
-        					
+
         					if(sh.getTop() == null) {
-        						
+
         						String text = GPM.getFormatUtil().formatSymbols(row);
-            					
+
             					text = GPM.getFormatUtil().formatPlaceholders(text, t);
-            					
+
             					text = GPM.getMManager().getGradientMessage(text);
-            					
+
             					sh.getBase().setCustomNameVisible(sh.getTop() == null && !text.equalsIgnoreCase(Values.EMPTY_LINE_TEXT));
-            					
+
             					try { sh.getBase().setCustomName(CraftChatMessage.fromString(text)[0]); } catch (Exception e) { }
 
 								ClientboundSetEntityDataPacket pa2 = new ClientboundSetEntityDataPacket(sh.getBase().getId(), sh.getBase().getEntityData(), true);
 
 								tc.connection.send(pa2);
-        						
+
         					} else if(sh.getEntity() != null) {
-        						
+
         						Vector v = t.getLocation().subtract(sh.getEntity().getBukkitEntity().getLocation()).toVector();
-        						
+
         						Location l = sh.getEntity().getBukkitEntity().getLocation().setDirection(v);
-        						
+
         						byte u = getFixedRotation(l.getYaw());
             					byte u1 = getFixedRotation(l.getPitch());
 

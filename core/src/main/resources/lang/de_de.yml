@@ -19,7 +19,7 @@ Messages:
   
   command-reload: "[P]&a Die Einstellungen wurden erfolgreich neu geladen."
   command-permission-error: "[P]&c Sie haben keine Berechtigung, diesen Befehl zu verwenden!"
-  command-console-error: "[P]&c Dieser Befehl ist nur für Spieler!"
+  command-sender-error: "[P]&c Dieser Sender kann diesen Befehl nicht ausführen!"
   command-gholo-use-error: "[P]&c Befehl: /holo help"
   command-gholo-create-use-error: "[P]&c Befehl: /holo create <Id>"
   command-gholo-create-exists-error: "[P]&c Holo&6 %Holo%&c existiert bereits!"

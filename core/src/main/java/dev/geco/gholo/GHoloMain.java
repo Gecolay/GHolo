@@ -177,7 +177,7 @@ public class GHoloMain extends JavaPlugin {
         }
         String v = Bukkit.getServer().getClass().getPackage().getName();
         v = v.substring(v.lastIndexOf('.') + 1);
-        if(NMSManager.isNewerOrVersion(17, 0) && !version_list.contains(v)) {
+        if(!NMSManager.isNewerOrVersion(9, 0) || (NMSManager.isNewerOrVersion(17, 0) && !version_list.contains(v))) {
             getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-version", "%Version%", v);
             updateCheck();
             Bukkit.getPluginManager().disablePlugin(getInstance());

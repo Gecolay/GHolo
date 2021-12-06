@@ -1,4 +1,4 @@
-package dev.geco.gholo.mcv.v1_17_R1;
+package dev.geco.gholo.mcv.v1_17_R1_2.manager;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -163,9 +163,9 @@ public class HoloSpawnManager implements IHoloSpawnManager {
     		
     		for(HoloRow sh : holos.get(H)) {
 
-				ClientboundRemoveEntityPacket r = new ClientboundRemoveEntityPacket(sh.getBase().getId());
+				ClientboundRemoveEntitiesPacket r = new ClientboundRemoveEntitiesPacket(sh.getBase().getId());
 
-				ClientboundRemoveEntityPacket r2 = sh.getTop() != null ? new ClientboundRemoveEntityPacket(sh.getTop().getId()) : null;
+				ClientboundRemoveEntitiesPacket r2 = sh.getTop() != null ? new ClientboundRemoveEntitiesPacket(sh.getTop().getId()) : null;
     			
     			for(UUID u : H.getUUIDs()) {
     				
@@ -322,9 +322,9 @@ public class HoloSpawnManager implements IHoloSpawnManager {
         			
         			if(rl.size() > 0) {
 
-						ClientboundRemoveEntityPacket r = new ClientboundRemoveEntityPacket(sh.getBase().getId());
+						ClientboundRemoveEntitiesPacket r = new ClientboundRemoveEntitiesPacket(sh.getBase().getId());
 
-						ClientboundRemoveEntityPacket r2 = sh.getTop() != null ? new ClientboundRemoveEntityPacket(sh.getTop().getId()) : null;
+						ClientboundRemoveEntitiesPacket r2 = sh.getTop() != null ? new ClientboundRemoveEntitiesPacket(sh.getTop().getId()) : null;
             			
             			for(Player t : rl) {
 

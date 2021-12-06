@@ -65,6 +65,16 @@ public class NMSManager {
 		}
 	}
 
+	public static Object getPackageObject(String Name, String ClassName, Object O) {
+		try {
+			Class<?> sm = Class.forName("dev.geco." + Name + ".mcv." + NMSManager.getPackageVersion() + "." + ClassName);
+			return O == null ? sm.getConstructor().newInstance() : sm.getConstructor(O.getClass()).newInstance(O);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public static Class<?> getNMSClass(String ClassName) {
 		Class<?> C = null;
 		try { return Class.forName("net.minecraft.server." + getClassVersion() + "." + ClassName); } catch (Exception e) { }
@@ -111,7 +121,7 @@ public class NMSManager {
 			return m.invoke(O);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			return O;
 		}
 	}
 
