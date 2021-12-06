@@ -24,22 +24,22 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 	
 	private HashMap<Holo, List<HoloRow>> holos = new HashMap<>();
 	
-	private Class<?> World = NMSManager.getNMSClass("World");
-	private Class<?> Entity = NMSManager.getNMSClass("Entity");
-	private Class<?> DataWatcher = NMSManager.getNMSClass("DataWatcher");
-	private Class<?> MojangsonParser = NMSManager.getNMSClass("MojangsonParser");
-	private Class<?> NBTTagCompound = NMSManager.getNMSClass("NBTTagCompound");
-	private Class<?> EntityArmorStand = NMSManager.getNMSClass("EntityArmorStand");
-	private Class<?> EntityAreaEffectCloud = NMSManager.getNMSClass("EntityAreaEffectCloud");
-	private Class<?> EntityItem = NMSManager.getNMSClass("EntityItem");
-	private Class<?> ItemStack = NMSManager.getNMSClass("ItemStack");
-	private Class<?> CraftItemStack = NMSManager.getOBCClass("inventory.CraftItemStack");
-	private Class<?> IChatBaseComponent = NMSManager.getNMSClass("IChatBaseComponent");
-	private Class<?> CraftChatMessage = NMSManager.getOBCClass("util.CraftChatMessage");
-	private Class<?> PacketPlayOutEntityDestroy = NMSManager.getNMSClass("PacketPlayOutEntityDestroy");
-	private Class<?> PacketPlayOutSpawnEntity = NMSManager.getNMSClass("PacketPlayOutSpawnEntity");
-	private Class<?> PacketPlayOutEntityMetadata = NMSManager.getNMSClass("PacketPlayOutEntityMetadata");
-	private Class<?> PacketPlayOutMount = NMSManager.getNMSClass("PacketPlayOutMount");
+	private final Class<?> World = NMSManager.getNMSClass("World");
+	private final Class<?> Entity = NMSManager.getNMSClass("Entity");
+	private final Class<?> DataWatcher = NMSManager.getNMSClass("DataWatcher");
+	private final Class<?> MojangsonParser = NMSManager.getNMSClass("MojangsonParser");
+	private final Class<?> NBTTagCompound = NMSManager.getNMSClass("NBTTagCompound");
+	private final Class<?> EntityArmorStand = NMSManager.getNMSClass("EntityArmorStand");
+	private final Class<?> EntityAreaEffectCloud = NMSManager.getNMSClass("EntityAreaEffectCloud");
+	private final Class<?> EntityItem = NMSManager.getNMSClass("EntityItem");
+	private final Class<?> ItemStack = NMSManager.getNMSClass("ItemStack");
+	private final Class<?> CraftItemStack = NMSManager.getOBCClass("inventory.CraftItemStack");
+	private final Class<?> IChatBaseComponent = NMSManager.getNMSClass("IChatBaseComponent");
+	private final Class<?> CraftChatMessage = NMSManager.getOBCClass("util.CraftChatMessage");
+	private final Class<?> PacketPlayOutEntityDestroy = NMSManager.getNMSClass("PacketPlayOutEntityDestroy");
+	private final Class<?> PacketPlayOutSpawnEntity = NMSManager.getNMSClass("PacketPlayOutSpawnEntity");
+	private final Class<?> PacketPlayOutEntityMetadata = NMSManager.getNMSClass("PacketPlayOutEntityMetadata");
+	private final Class<?> PacketPlayOutMount = NMSManager.getNMSClass("PacketPlayOutMount");
 	
 	public void register() { for(Holo h : GPM.getHoloManager().getHolos().values()) registerHolo(h); }
 	
