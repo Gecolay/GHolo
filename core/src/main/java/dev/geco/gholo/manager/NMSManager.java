@@ -54,12 +54,25 @@ public class NMSManager {
 		return V.length > 1 && (V.length > 2 ? Long.parseLong(V[1]) == Version && Long.parseLong(V[2]) == SubVersion : Long.parseLong(V[1]) == Version);
 	}
 
+	public static boolean isNMSCompatible() {
+		try {
+			Class.forName("net.minecraft.server.level.EntityPlayer");
+			return true;
+		} catch(Exception e) {
+			try {
+				Class.forName("net.minecraft.server." + getClassVersion() + ".Entity");
+				return true;
+			} catch(Exception ex) { }
+		}
+		return false;
+	}
+
 	public static Field getField(Class<?> Class, String Field) {
 		try {
 			Field F = Class.getDeclaredField(Field);
 			F.setAccessible(true);
 			return F;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -125,10 +138,11 @@ public class NMSManager {
 		}
 	}
 
-	public static void sendPacket(Player P, Object Packet) {
+	public static void sendPacket(Player P, Object Packet) { sendPacket(getNMSCopy(P), Packet); }
+
+	public static void sendPacket(Object P, Object Packet) {
 		try {
-			Object n = getNMSCopy(P);
-			Object p = n.getClass().getField("playerConnection").get(n);
+			Object p = P.getClass().getField("playerConnection").get(P);
 			p.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(p, Packet);
 		} catch(Exception e) { e.printStackTrace(); }
 	}
