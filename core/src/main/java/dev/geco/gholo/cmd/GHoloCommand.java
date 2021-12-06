@@ -65,7 +65,7 @@ public class GHoloCommand implements CommandExecutor {
 							GPM.getMManager().sendMessage(s, "Messages.command-gholo-create", "%Holo%", a[1].toLowerCase());
 						} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-create-exists-error", "%Holo%", a[1].toLowerCase());
 					} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-create-use-error");
-				} else GPM.getMManager().sendMessage(s, "Messages.command-console-error");
+				} else GPM.getMManager().sendMessage(s, "Messages.command-sender-error");
 				break;
 			case "info":
 				if(a.length > 1) {
@@ -96,7 +96,7 @@ public class GHoloCommand implements CommandExecutor {
 							p.teleport(GPM.getHoloManager().getHolo(a[1]).getLocation(), TeleportCause.COMMAND);
 						} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-tp-exists-error", "%Holo%", a[1].toLowerCase());
 					} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-tp-use-error");
-				} else GPM.getMManager().sendMessage(s, "Messages.command-console-error");
+				} else GPM.getMManager().sendMessage(s, "Messages.command-sender-error");
 				break;
 			case "tphere":
 				if(s instanceof Player) {
@@ -106,7 +106,7 @@ public class GHoloCommand implements CommandExecutor {
 							GPM.getHoloManager().moveHolo(a[1], p.getLocation());
 						} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-tphere-exists-error", "%Holo%", a[1].toLowerCase());
 					} else GPM.getMManager().sendMessage(s, "Messages.command-gholo-tphere-use-error");
-				} else GPM.getMManager().sendMessage(s, "Messages.command-console-error");
+				} else GPM.getMManager().sendMessage(s, "Messages.command-sender-error");
 				break;
 			case "tpto":
 				if(a.length > 4) {
