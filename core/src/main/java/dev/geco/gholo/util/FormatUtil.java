@@ -16,7 +16,7 @@ public class FormatUtil {
 	
 	private final GHoloMain GPM;
 	
-    public FormatUtil(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	public FormatUtil(GHoloMain GHoloMain) { GPM = GHoloMain; }
 	
 	public String getLocationString(Location L) {
 

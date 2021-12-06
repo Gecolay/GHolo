@@ -10,8 +10,8 @@ public class PlayerEvents implements Listener {
 	
 	private final GHoloMain GPM;
 	
-    public PlayerEvents(GHoloMain GHoloMain) { GPM = GHoloMain; }
-    
+	public PlayerEvents(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	
 	@EventHandler
 	public void PJoiE(PlayerJoinEvent e) {
 		

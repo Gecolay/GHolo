@@ -21,8 +21,8 @@ public class GHoloCommand implements CommandExecutor {
 	
 	private final GHoloMain GPM;
 	
-    public GHoloCommand(GHoloMain GHoloMain) { GPM = GHoloMain; }
-    
+	public GHoloCommand(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	
 	@Override
 	public boolean onCommand(CommandSender s, Command c, String l, String[] a) {
 		if(s instanceof Player) {

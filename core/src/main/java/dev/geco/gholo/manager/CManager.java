@@ -19,10 +19,10 @@ public class CManager {
 	
 	private final GHoloMain GPM;
 	
-    public CManager(GHoloMain GHoloMain) {
-    	GPM = GHoloMain;
-    	reload();
-    }
+	public CManager(GHoloMain GHoloMain) {
+		GPM = GHoloMain;
+		reload();
+	}
 	
 	public void reload() {
 		

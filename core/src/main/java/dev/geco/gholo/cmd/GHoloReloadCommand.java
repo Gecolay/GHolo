@@ -9,7 +9,7 @@ public class GHoloReloadCommand implements CommandExecutor {
 	
 	private final GHoloMain GPM;
 	
-    public GHoloReloadCommand(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	public GHoloReloadCommand(GHoloMain GHoloMain) { GPM = GHoloMain; }
 	
 	@Override
 	public boolean onCommand(CommandSender s, Command c, String l, String[] a) {

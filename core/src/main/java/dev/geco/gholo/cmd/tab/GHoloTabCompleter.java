@@ -15,9 +15,9 @@ public class GHoloTabCompleter implements TabCompleter {
 	
 	private GHoloMain GPM;
 	
-    public GHoloTabCompleter(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	public GHoloTabCompleter(GHoloMain GHoloMain) { GPM = GHoloMain; }
 	
-    @Override
+	@Override
 	public List<String> onTabComplete(CommandSender s, Command c, String l, String[] a) {
 		List<String> ta = new ArrayList<>(), ts = new ArrayList<>();
 		if(a.length == 1) {

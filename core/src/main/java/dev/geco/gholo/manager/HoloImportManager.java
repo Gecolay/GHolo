@@ -15,7 +15,7 @@ public class HoloImportManager {
 	
 	private final GHoloMain GPM;
 	
-    public HoloImportManager(GHoloMain GHoloMain) { GPM = GHoloMain; }
+	public HoloImportManager(GHoloMain GHoloMain) { GPM = GHoloMain; }
 	
 	public static List<String> PLUGIN_IMPORTS = Arrays.asList("holographic_displays");
 	
