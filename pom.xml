@@ -25,7 +25,7 @@
     </properties>
 
     <build>
-        <defaultGoal>package</defaultGoal>
+        <defaultGoal>clean install</defaultGoal>
     </build>
 
 </project>
