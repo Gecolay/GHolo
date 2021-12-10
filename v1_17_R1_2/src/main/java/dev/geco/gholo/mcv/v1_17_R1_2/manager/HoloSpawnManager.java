@@ -24,7 +24,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 
 import dev.geco.gholo.GHoloMain;
-import dev.geco.gholo.manager.NMSManager;
 import dev.geco.gholo.objects.*;
 import dev.geco.gholo.values.Values;
 
@@ -333,7 +332,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                             if(r2 != null) tc.connection.send(r2);
 
-                            tc.connection.send(r2);
+                            tc.connection.send(r);
                             
                         }
                         
