@@ -127,7 +127,7 @@ public class NMSManager {
         }
     }
 
-    public static Object getNMSCopy(Object O) {
+    public static Object getHandle(Object O) {
         try {
             Method m = O.getClass().getDeclaredMethod("getHandle");
             m.setAccessible(true);
@@ -138,7 +138,7 @@ public class NMSManager {
         }
     }
 
-    public static void sendPacket(Player P, Object Packet) { sendPacket(getNMSCopy(P), Packet); }
+    public static void sendPacket(Player P, Object Packet) { sendPacket(getHandle(P), Packet); }
 
     public static void sendPacket(Object P, Object Packet) {
         try {

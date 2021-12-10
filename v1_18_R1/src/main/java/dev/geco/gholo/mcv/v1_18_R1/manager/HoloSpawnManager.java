@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_18_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
@@ -173,7 +174,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                     if(t != null && t.isOnline()) {
 
-                        ServerPlayer tc = (ServerPlayer) NMSManager.getNMSCopy(t);
+                        ServerPlayer tc = ((CraftPlayer) t).getHandle();
 
                         if(r2 != null) tc.connection.send(r2);
 
@@ -235,7 +236,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                         if(!t.isOnline()) continue;
 
-                        ServerPlayer tc = (ServerPlayer) NMSManager.getNMSCopy(t);
+                        ServerPlayer tc = ((CraftPlayer) t).getHandle();
 
                         if(!holo.getUUIDs().contains(t.getUniqueId())) {
 
@@ -328,7 +329,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
                         
                         for(Player t : rl) {
 
-                            ServerPlayer tc = (ServerPlayer) NMSManager.getNMSCopy(t);
+                            ServerPlayer tc = ((CraftPlayer) t).getHandle();
 
                             if(r2 != null) tc.connection.send(r2);
 
