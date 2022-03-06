@@ -281,6 +281,6 @@ public class HoloManager {
 
     private void stopAutoSave() { if(r != null) r.cancel(); }
 
-    private void saveFile(File F, FileConfiguration FC) { try { FC.save(F); } catch (IOException e) { } }
+    private void saveFile(File F, FileConfiguration FC) { try { FC.save(F); } catch (IOException e) { try { FC.save(F); } catch (IOException e1) { e1.printStackTrace(); } } }
 
 }
