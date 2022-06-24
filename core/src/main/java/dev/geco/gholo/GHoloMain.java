@@ -175,6 +175,7 @@ public class GHoloMain extends JavaPlugin {
             version_list.add("v1_17_R1");
             version_list.add("v1_18_R1");
             version_list.add("v1_18_R2");
+            version_list.add("v1_19_R1");
         }
         String v = Bukkit.getServer().getClass().getPackage().getName();
         v = v.substring(v.lastIndexOf('.') + 1);
