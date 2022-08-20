@@ -157,7 +157,7 @@ public class HoloManager {
 
         };
 
-        e.runTaskTimerAsynchronously(GPM, 0, 2);
+        e.runTaskTimer(GPM, 0, 2);
 
     }
 
@@ -205,7 +205,7 @@ public class HoloManager {
 
             }
 
-        }.runTaskLaterAsynchronously(GPM, 3);
+        }.runTaskLater(GPM, 3);
 
     }
 
@@ -275,7 +275,7 @@ public class HoloManager {
 
         long t = 20 * 180;
 
-        r.runTaskTimerAsynchronously(GPM, t, t);
+        r.runTaskTimer(GPM, t, t);
 
     }
 

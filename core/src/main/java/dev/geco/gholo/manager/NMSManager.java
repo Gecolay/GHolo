@@ -37,7 +37,7 @@ public class NMSManager {
     }
 
     public static String getPackageVersion() {
-        return getClassVersion() + (isVersion(17, 1) ? "_2" : "");
+        return getClassVersion() + (isVersion(17, 1) || isVersion(19, 1) || isVersion(19, 2) ? "_2" : "");
     }
 
     public static String getVersion() {
@@ -45,13 +45,17 @@ public class NMSManager {
     }
 
     public static boolean isNewerOrVersion(long Version, int SubVersion) {
-        String[] V = getVersion().split("\\.");
-        return V.length > 1 && (V.length > 2 ? Long.parseLong(V[1]) >= Version && Long.parseLong(V[2]) >= SubVersion : Long.parseLong(V[1]) >= Version);
+
+        String[] version = getVersion().split("\\.");
+
+        return version.length > 1 && (version.length > 2 ? Long.parseLong(version[1]) >= Version && Long.parseLong(version[2]) >= SubVersion : Long.parseLong(version[1]) >= Version);
     }
 
     public static boolean isVersion(long Version, int SubVersion) {
-        String[] V = getVersion().split("\\.");
-        return V.length > 1 && (V.length > 2 ? Long.parseLong(V[1]) == Version && Long.parseLong(V[2]) == SubVersion : Long.parseLong(V[1]) == Version);
+
+        String[] version = getVersion().split("\\.");
+
+        return version.length > 1 && (version.length > 2 ? Long.parseLong(version[1]) == Version && Long.parseLong(version[2]) == SubVersion : Long.parseLong(version[1]) == Version && SubVersion == 0);
     }
 
     public static boolean isNMSCompatible() {

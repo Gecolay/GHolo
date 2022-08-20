@@ -7,7 +7,7 @@
     <groupId>dev.geco</groupId>
     <artifactId>GHolo</artifactId>
     <name>GHolo</name>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <description>Create Holos with modern Technology, great Performance and Animations!</description>
     <url>https://www.spigotmc.org/resources/70913</url>
     <packaging>pom</packaging>
@@ -19,6 +19,7 @@
         <module>v1_18_R1</module>
         <module>v1_18_R2</module>
         <module>v1_19_R1</module>
+        <module>v1_19_R1_2</module>
         <module>dist</module>
     </modules>
 
