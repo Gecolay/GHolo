@@ -39,10 +39,20 @@ public class HoloImportManager {
                 for(String i : L) {
                     
                     if(!GPM.getHoloManager().existsHolo(i)) {
+                        String[] a = null;
                         
-                        String[] a = FD.getString(i + ".location").split(",");
+                        if(FD.contains(i + ".location") {    
+                            String[] a = FD.getString(i + ".location").split(",");   
+                        } else { 
+                           String basePath = i + ".position.";
+                           a = new String[4];
+                           a[0] = FD.getString(basePath + "world");
+                           a[1] = FD.getString(basePath + "x");
+                           a[2] = FD.getString(basePath + "y");
+                           a[3] = FD.getString(basePath + "z");
+                        }
+                        
                         World w = Bukkit.getWorld(a[0]);
-                        
                         if(w != null) {
                             List<String> r = FD.getStringList(i + ".lines");
                             List<String> r1 = FD.getStringList(i + ".lines");
@@ -50,6 +60,7 @@ public class HoloImportManager {
                             GPM.getHoloManager().insertHolo(i, new Location(w, Double.parseDouble(a[1]), Double.parseDouble(a[2]) - 0.51, Double.parseDouble(a[3])), r);
                             b = true;
                         }
+                        
                         
                     }
                     
