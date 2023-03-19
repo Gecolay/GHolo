@@ -1,0 +1,20 @@
+Lang:
+
+  # Defines the plugin language
+  lang: en_en
+
+
+
+Options:
+
+  # Defines whether the plugin should notify when a new version is available
+  check-for-update: true
+
+  # Defines the space between the top part of two rows
+  space-between-lines: 0.26
+
+  # Defines a list of unicode symbols, which are to be converted within holo rows
+  Symbols:
+
+    "[X]": "\u2588"
+    "[|]": "\u23B9"

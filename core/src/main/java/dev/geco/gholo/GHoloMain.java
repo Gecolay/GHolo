@@ -1,190 +1,175 @@
 package dev.geco.gholo;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.Callable;
+import org.bukkit.*;
+import org.bukkit.command.*;
+import org.bukkit.plugin.java.*;
 
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.*;
-import org.bukkit.entity.*;
-import org.bukkit.plugin.java.JavaPlugin;
-
+import dev.geco.gholo.api.event.*;
 import dev.geco.gholo.cmd.*;
 import dev.geco.gholo.cmd.tab.*;
 import dev.geco.gholo.events.*;
 import dev.geco.gholo.link.*;
 import dev.geco.gholo.manager.*;
-import dev.geco.gholo.objects.*;
 import dev.geco.gholo.util.*;
-import dev.geco.gholo.values.*;
 
 public class GHoloMain extends JavaPlugin {
 
-    private FileConfiguration messages;
+    private CManager cManager;
+    public CManager getCManager() { return cManager; }
 
-    public FileConfiguration getMessages() { return messages; }
+    private DManager dManager;
+    public DManager getDManager() { return dManager; }
 
-    private CManager cmanager;
+    private HoloAnimationManager holoAnimationManager;
+    public HoloAnimationManager getHoloAnimationManager() { return holoAnimationManager; }
 
-    public CManager getCManager() { return cmanager; }
+    private HoloImportManager holoImportManager;
+    public HoloImportManager getHoloImportManager() { return holoImportManager; }
 
-    private String prefix;
+    private HoloManager holoManager;
+    public HoloManager getHoloManager() { return holoManager; }
 
-    public String getPrefix() { return prefix; }
+    private UManager uManager;
+    public UManager getUManager() { return uManager; }
 
-    private Values values;
+    private PManager pManager;
+    public PManager getPManager() { return pManager; }
 
-    public Values getValues() { return values; }
+    private MManager mManager;
+    public MManager getMManager() { return mManager; }
 
-    private AnimationManager animationmanager;
+    private FormatUtil formatUtil;
+    public FormatUtil getFormatUtil() { return formatUtil; }
 
-    public AnimationManager getAnimationManager() { return animationmanager; }
-
-    private HoloManager holomanager;
-
-    public HoloManager getHoloManager() { return holomanager; }
-
-    private HoloConditionManager holoconditionmanager;
-
-    public HoloConditionManager getHoloConditionManager() { return holoconditionmanager; }
-
-    private HoloImportManager holoimportmanager;
-
-    public HoloImportManager getHoloImportManager() { return holoimportmanager; }
-
-    private UManager umanager;
-
-    public UManager getUManager() { return umanager; }
-
-    private MManager mmanager;
-
-    public MManager getMManager() { return mmanager; }
-
-    private FormatUtil formatutil;
-
-    public FormatUtil getFormatUtil() { return formatutil; }
+    private PlaceholderAPILink placeholderAPILink;
+    public PlaceholderAPILink getPlaceholderAPILink() { return placeholderAPILink; }
 
     public final String NAME = "GHolo";
 
-    public final String RESOURCE = "70913";
+    public final String RESOURCE = "";
 
     private static GHoloMain GPM;
 
     public static GHoloMain getInstance() { return GPM; }
 
-    private void setupSettings() {
-        copyLangFiles();
-        messages = YamlConfiguration.loadConfiguration(new File("plugins/" + NAME + "/" + Values.LANG_PATH, getConfig().getString("Lang.lang") + Values.YML_FILETYP));
-        prefix = getMessages().getString("Plugin.plugin-prefix");
-        if(!ImageUtil.IMAGE_PATH.exists()) ImageUtil.IMAGE_PATH.mkdir();
-        if(!new File("plugins/" + NAME + "/animations" + Values.YML_FILETYP).exists()) saveResource("animations" + Values.YML_FILETYP, false);
-        getAnimationManager().loadHoloAnimations();
+    private void loadSettings() {
+
+        dManager.connect();
+
+        getHoloManager().createTable();
+
+        getHoloAnimationManager().loadHoloAnimations();
         getHoloManager().loadHolos();
     }
 
     private void linkBStats() {
-        BStatsLink bstats = new BStatsLink(getInstance(), 4921);
-        bstats.addCustomChart(new BStatsLink.SimplePie("plugin_language", new Callable<String>() {
-            @Override
-            public String call() {
-                return getConfig().getString("Lang.lang").toLowerCase();
-            }
-        }));
-        bstats.addCustomChart(new BStatsLink.SingleLineChart("amount_holos_total", new Callable<Integer>() {
-            @Override
-            public Integer call() {
-                return getHoloManager().getHolos().size();
-            }
-        }));
-        bstats.addCustomChart(new BStatsLink.SingleLineChart("amount_holo_rows_total", new Callable<Integer>() {
-            @Override
-            public Integer call() {
-                int i = 0;
-                for(Holo h : getHoloManager().getHolos().values()) i += h.getContent().size();
-                return i;
-            }
-        }));
+
+        BStatsLink bstats = new BStatsLink(getInstance(), 4914);
+
+        bstats.addCustomChart(new BStatsLink.SimplePie("plugin_language", () -> getCManager().L_LANG));
     }
 
     public void onLoad() {
+
         GPM = this;
-        saveDefaultConfig();
-        cmanager = new CManager(getInstance());
-        values = new Values();
-        animationmanager = new AnimationManager(getInstance());
-        holoconditionmanager = new HoloConditionManager(getInstance());
-        holoimportmanager = new HoloImportManager(getInstance());
-        umanager = new UManager(getInstance(), RESOURCE);
-        mmanager = new MManager(getInstance());
-        formatutil = new FormatUtil(getInstance());
+
+        dManager = new DManager(getInstance());
+        cManager = new CManager(getInstance());
+        uManager = new UManager(getInstance());
+        pManager = new PManager(getInstance());
+        mManager = new MManager(getInstance());
+        holoAnimationManager = new HoloAnimationManager(getInstance());
+        holoImportManager = new HoloImportManager(getInstance());
+
+        formatUtil = new FormatUtil(getInstance());
     }
 
     public void onEnable() {
+
         if(!versionCheck()) return;
-        holomanager = new HoloManager(getInstance());
-        getCommand("gholo").setExecutor(new GHoloCommand(getInstance()));
-        getCommand("gholo").setTabCompleter(new GHoloTabCompleter(getInstance()));
-        getCommand("gholoreload").setExecutor(new GHoloReloadCommand(getInstance()));
-        getServer().getPluginManager().registerEvents(new PlayerEvents(getInstance()), getInstance());
-        setupSettings();
+
+        holoManager = new HoloManager(getInstance());
+
+        loadSettings();
+
+        setupCommands();
+        setupEvents();
         linkBStats();
+
         getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-enabled");
-        loadPluginDepends(Bukkit.getConsoleSender());
-        updateCheck();
+
+        loadPluginDependencies(Bukkit.getConsoleSender());
+        GPM.getUManager().checkForUpdates();
     }
 
     public void onDisable() {
-        getHoloManager().saveHolos();
-        getAnimationManager().stopHoloAnimations();
+
+        dManager.close();
+        getHoloAnimationManager().stopHoloAnimations();
+        getHoloManager().unloadHolos();
+
+        if(getPlaceholderAPILink() != null) getPlaceholderAPILink().unregister();
+
         getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-disabled");
     }
 
-    private void loadPluginDepends(CommandSender s) {
+    private void setupCommands() {
+
+        getCommand("gholo").setExecutor(new GHoloCommand(getInstance()));
+        getCommand("gholo").setTabCompleter(new GHoloTabComplete(getInstance()));
+        getCommand("gholoreload").setExecutor(new GHoloReloadCommand(getInstance()));
+        getCommand("gholoreload").setTabCompleter(new EmptyTabComplete());
+    }
+
+    private void setupEvents() {
+
+        getServer().getPluginManager().registerEvents(new PlayerEvents(getInstance()), getInstance());
+    }
+
+    private void preloadPluginDependencies() { }
+
+    private void loadPluginDependencies(CommandSender Sender) {
+
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            getValues().setPAPI(true);
-            getMManager().sendMessage(s, "Plugin.plugin-hook", "%Link%", "PlaceholderAPI");
-        } else getValues().setPAPI(false);
+            placeholderAPILink = new PlaceholderAPILink(getInstance());
+            getMManager().sendMessage(Sender, "Plugin.plugin-link", "%Link%", "PlaceholderAPI");
+            getPlaceholderAPILink().register();
+        } else placeholderAPILink = null;
     }
 
-    public void copyLangFiles() { for(String l : Arrays.asList("de_de", "en_en")) if(!new File("plugins/" + NAME + "/" + Values.LANG_PATH + "/" + l + Values.YML_FILETYP).exists()) saveResource(Values.LANG_PATH + "/" + l + Values.YML_FILETYP, false); }
+    public void reload(CommandSender Sender) {
 
-    public void reload(CommandSender s) {
-        getHoloManager().saveHolos();
-        getAnimationManager().stopHoloAnimations();
-        reloadConfig();
+        Bukkit.getPluginManager().callEvent(new GHoloReloadEvent(getInstance()));
+
         getCManager().reload();
-        setupSettings();
-        loadPluginDepends(s);
-        updateCheck();
-    }
+        getMManager().loadMessages();
 
-    private void updateCheck() {
-        if(getCManager().CHECK_FOR_UPDATES) {
-            getUManager().checkVersion();
-            if(!getUManager().isLatestVersion()) {
-                String me = getMManager().getMessage("Plugin.plugin-update", "%Name%", NAME, "%NewVersion%", getUManager().getLatestVersion(), "%Version%", getUManager().getPluginVersion(), "%Path%", getDescription().getWebsite());
-                for(Player p : Bukkit.getOnlinePlayers()) if(p.hasPermission(NAME + ".Update") || p.hasPermission(NAME + ".*")) p.sendMessage(me);
-                Bukkit.getConsoleSender().sendMessage(me);
-            }
-        }
+        dManager.close();
+        getHoloAnimationManager().stopHoloAnimations();
+        getHoloManager().unloadHolos();
+
+        if(getPlaceholderAPILink() != null) getPlaceholderAPILink().unregister();
+
+        loadSettings();
+        loadPluginDependencies(Sender);
+        GPM.getUManager().checkForUpdates();
     }
 
     private boolean versionCheck() {
-        List<String> version_list = new ArrayList<>(); {
-            version_list.add("v1_17_R1");
-            version_list.add("v1_18_R1");
-            version_list.add("v1_18_R2");
-            version_list.add("v1_19_R1");
-        }
-        String v = Bukkit.getServer().getClass().getPackage().getName();
-        v = v.substring(v.lastIndexOf('.') + 1);
-        if(!NMSManager.isNMSCompatible() || !NMSManager.isNewerOrVersion(9, 0) || (NMSManager.isNewerOrVersion(17, 0) && !version_list.contains(v))) {
-            getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-version", "%Version%", v);
-            updateCheck();
+
+        if(!NMSManager.hasPackageClass("manager.HoloSpawnManager")) {
+
+            String version = Bukkit.getServer().getClass().getPackage().getName();
+
+            getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-version", "%Version%", version.substring(version.lastIndexOf('.') + 1));
+
+            GPM.getUManager().checkForUpdates();
+
             Bukkit.getPluginManager().disablePlugin(getInstance());
+
             return false;
         }
+
         return true;
     }
 

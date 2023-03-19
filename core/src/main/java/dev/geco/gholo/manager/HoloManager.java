@@ -1,286 +1,129 @@
 package dev.geco.gholo.manager;
 
-import java.io.*;
+import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 
-import org.bukkit.Location;
-import org.bukkit.configuration.file.*;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.*;
+import org.bukkit.scheduler.*;
 
 import dev.geco.gholo.GHoloMain;
 import dev.geco.gholo.objects.*;
-import dev.geco.gholo.values.Values;
 
 public class HoloManager {
 
     private final GHoloMain GPM;
 
-    public HoloManager(GHoloMain GHoloMain) {
+    public HoloManager(GHoloMain GPluginMain) {
 
-        GPM = GHoloMain;
-
-        spawnmanager = NMSManager.isNewerOrVersion(17, 0) ? (IHoloSpawnManager) NMSManager.getPackageObject("gholo", "manager.HoloSpawnManager", GPM) : new HoloSpawnManager(GPM);
-
+        GPM = GPluginMain;
+        spawnmanager = (IHoloSpawnManager) NMSManager.getPackageObject("manager.HoloSpawnManager", GPM);
     }
 
-    private File HData;
+    public void createTable() {
+        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos (id TEXT, last_update INTEGER, range INTEGER, l_world TEXT, l_x REAL, l_y REAL, l_z REAL);");
+        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos_content (id TEXT, content TEXT);");
+    }
 
-    private FileConfiguration HD;
+    private final IHoloSpawnManager spawnmanager;
 
-    private HashMap<String, Holo> holos = new HashMap<String, Holo>();
+    private BukkitRunnable bukkitRunnable;
 
-    private BukkitRunnable r, e;
-
-    private IHoloSpawnManager spawnmanager;
-
-    public IHoloSpawnManager getSpawnManager() { return spawnmanager; }
-
-    public Holo getHolo(String Id) { return holos.get(Id.toLowerCase()); }
+    public GHolo getHolo(String Id) { return holos.stream().filter(holo -> holo.getId().equalsIgnoreCase(Id)).findFirst().orElse(null); }
 
     public boolean existsHolo(String Id) { return getHolo(Id) != null; }
 
-    public void insertHolo(String Id, Location L, List<String> C) { insertHolo(Id, L, C, null, -1); }
+    public void insertHolo(String Id, Location Location, List<String> Content) { insertHolo(Id, Location, Content, -1); }
 
-    public void insertHolo(String Id, Location L, List<String> C, String Q) { insertHolo(Id, L, C, Q, -1); }
+    public void insertHolo(String Id, Location Location, List<String> Content, int Range) { saveHolo(new GHolo(Id.toLowerCase(), Location, Content, Range)); }
 
-    public void insertHolo(String Id, Location L, List<String> C, String Q, int R) {
+    public void unloadHolos() {
 
-        Holo h = new Holo(Id.toLowerCase(), L, C, Q, R);
+        if(bukkitRunnable != null) bukkitRunnable.cancel();
 
-        holos.put(Id.toLowerCase(), h);
+        for(GHolo holo : getHolos()) removeHolo(holo, false);
 
-        if(L != null && L.getWorld() != null) getSpawnManager().registerHolo(h);
-
+        holos.clear();
+        holo_updates.clear();
     }
 
-    public void removeHolo(String Id) {
+    private final List<GHolo> holos = new ArrayList<>();
 
-        getSpawnManager().unregisterHolo(getHolo(Id), true);
+    private final HashMap<String, Long> holo_updates = new HashMap<>();
 
-        holos.remove(Id.toLowerCase());
+    public List<GHolo> getHolos() { return new ArrayList<>(holos); }
 
+    private void spawnHolo(GHolo Holo) { spawnmanager.registerHolo(Holo); }
+
+    public void saveHolo(GHolo Holo) {
+
+        long update = System.currentTimeMillis();
+        holo_updates.put(Holo.getId(), update);
+
+        if(holos.contains(Holo)) removeHolo(Holo, true);
+
+        GPM.getDManager().execute("INSERT INTO holos (id, last_update, range, l_world, l_x, l_y, l_z) VALUES (?, ?, ?, ?, ?, ?, ?)", Holo.getId(), update, Holo.getRange(), Holo.getLocation().getWorld().getName(), Holo.getLocation().getX(), Holo.getLocation().getY(), Holo.getLocation().getZ());
+        for(String line : Holo.getContent()) GPM.getDManager().execute("INSERT INTO holos_content (id, content) VALUES (?, ?)", Holo.getId(), line);
+        holos.add(Holo);
+
+        spawnHolo(Holo);
     }
 
-    public void moveHolo(String Id, Location L) {
-
-        Holo h = getHolo(Id);
-
-        h.setLocation(L);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void addHoloContent(String Id, String C) {
-
-        Holo h = getHolo(Id);
-
-        h.addContent(C);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void removeHoloContent(String Id, int R) {
-
-        Holo h = getHolo(Id);
-
-        h.removeContent(R);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void setHoloContent(String Id, List<String> C) {
-
-        Holo h = getHolo(Id);
-
-        h.setContent(C);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void setHoloContent(String Id, int R, String C) {
-
-        Holo h = getHolo(Id);
-
-        h.setContent(R, C);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void insertHoloContent(String Id, int R, String C) {
-
-        Holo h = getHolo(Id);
-
-        h.insertContent(R, C);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void setHoloCondition(String Id, String C) {
-
-        Holo h = getHolo(Id);
-
-        h.setCondition(C);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public void setHoloRange(String Id, int R) {
-
-        Holo h = getHolo(Id);
-
-        h.setRange(R);
-
-        getSpawnManager().registerHolo(h);
-
-    }
-
-    public HashMap<String, Holo> getHolos() { return holos; }
-
-    private void startHolos() {
-
-        e = new BukkitRunnable() {
-
-            @Override
-            public void run() {
-
-                getSpawnManager().spawn();
-
-            }
-
-        };
-
-        e.runTaskTimer(GPM, 0, 2);
-
-    }
-
-    private void stopHolos() {
-
-        if(e != null) e.cancel();
-
-        getSpawnManager().unregister();
-
+    public void removeHolo(GHolo Holo, boolean Database) {
+        holos.remove(Holo);
+        spawnmanager.unregisterHolo(Holo);
+        if(!Database) return;
+        GPM.getDManager().execute("DELETE FROM holos WHERE id = ?", Holo.getId());
+        GPM.getDManager().execute("DELETE FROM holos_content WHERE id = ?", Holo.getId());
     }
 
     public void loadHolos() {
 
-        HData = new File("plugins/" + GPM.NAME, Values.DATA_PATH + "/h" + Values.DATA_FILETYP);
-        HD = YamlConfiguration.loadConfiguration(HData);
-
         new BukkitRunnable() {
-
             @Override
             public void run() {
 
-                if(HD.getConfigurationSection("H") != null) {
+                try {
 
-                    for(Entry<String, Object> i : HD.getConfigurationSection("H").getValues(false).entrySet()) {
+                    ResultSet resultSet = GPM.getDManager().executeAndGet("SELECT * FROM holos");
 
-                        try {
-
-                            Location L = GPM.getFormatUtil().getStringLocation(HD.getString("H." + i.getKey() + ".l"));
-
-                            List<String> C = HD.getStringList("H." + i.getKey() + ".c");
-                            String Q = HD.getString("H." + i.getKey() + ".q");
-                            int R = HD.getInt("H." + i.getKey() + ".r", -1);
-
-                            if(L != null) insertHolo(i.getKey(), L, C, Q, R);
-                            else throw new NullPointerException(HD.getString("H." + i.getKey() + ".l"));
-
-                        } catch (Exception e) { e.printStackTrace(); }
-
+                    while(resultSet.next()) {
+                        String id = resultSet.getString("id");
+                        long lastUpdate = resultSet.getLong("last_update");
+                        World world = Bukkit.getWorld(resultSet.getString("l_world"));
+                        double x = resultSet.getDouble("l_x");
+                        double y = resultSet.getDouble("l_y");
+                        double z = resultSet.getDouble("l_z");
+                        if(world == null) continue;
+                        Location location = new Location(world, x, y, z);
+                        List<String> content = new ArrayList<>();
+                        ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holos_content WHERE id = ?", id);
+                        while(resultSetContent.next()) content.add(resultSetContent.getString("content"));
+                        int range = resultSet.getInt("range");
+                        GHolo holo = new GHolo(id, location, content, range);
+                        if(!holo_updates.containsKey(id)) {
+                            holos.add(holo);
+                            holo_updates.put(id, lastUpdate);
+                        } else if(holo_updates.get(id) >= lastUpdate) continue;
+                        spawnHolo(holo);
                     }
 
-                }
+                    List<GHolo> remove = new ArrayList<>();
+                    for(GHolo holo : getHolos()) if(!holo_updates.containsKey(holo.getId())) remove.add(holo);
+                    for(GHolo holo : remove) removeHolo(holo, false);
 
-                startAutoSave();
-                startHolos();
+                } catch (Exception e) { e.printStackTrace(); }
 
+                bukkitRunnable = new BukkitRunnable() {
+
+                    @Override
+                    public void run() {
+
+                        spawnmanager.spawn();
+                    }
+                };
+
+                bukkitRunnable.runTaskTimer(GPM, 0, 2);
             }
-
         }.runTaskLater(GPM, 3);
-
     }
-
-    public void quickSaveHolos() {
-
-        FileConfiguration bu = YamlConfiguration.loadConfiguration(HData);
-
-        HD.set("H", null);
-
-        for(Holo h : holos.values()) {
-
-            try {
-
-                String l = GPM.getFormatUtil().getLocationString(h.getLocation());
-
-                if(l == null) throw new NullPointerException(h.getLocation().toString());
-
-                HD.set("H." + h.getId() + ".l",  l);
-                if(h.getContent().size() > 0) HD.set("H." + h.getId() + ".c", h.getContent());
-                if(h.getCondition() != null) HD.set("H." + h.getId() + ".q", h.getCondition());
-                if(h.getRange() != -1) HD.set("H." + h.getId() + ".r", h.getRange());
-
-            } catch (Exception e) { e.printStackTrace(); }
-
-        }
-
-        try {
-
-            if(holos.values().size() > 0) {
-
-                if(HD.getConfigurationSection("H").getValues(false).entrySet().size() > 0) saveFile(HData, HD);
-                else throw new IllegalArgumentException(holos.values().size() + " " + HD.getConfigurationSection("H").getValues(false).entrySet().size());
-
-            } else saveFile(HData, HD);
-
-        } catch (Exception e) {
-            HD = bu;
-            e.printStackTrace();
-        }
-
-    }
-
-    public void saveHolos() {
-
-        quickSaveHolos();
-
-        stopHolos();
-
-        stopAutoSave();
-
-    }
-
-    private void startAutoSave() {
-
-        stopAutoSave();
-
-        r = new BukkitRunnable() {
-
-            @Override
-            public void run() {
-
-                quickSaveHolos();
-
-            }
-
-        };
-
-        long t = 20 * 180;
-
-        r.runTaskTimer(GPM, t, t);
-
-    }
-
-    private void stopAutoSave() { if(r != null) r.cancel(); }
-
-    private void saveFile(File F, FileConfiguration FC) { try { FC.save(F); } catch (IOException e) { try { FC.save(F); } catch (IOException e1) { e1.printStackTrace(); } } }
-
 }

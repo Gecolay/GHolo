@@ -4,89 +4,118 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import org.bukkit.plugin.Plugin;
+import org.bukkit.*;
+import org.bukkit.entity.*;
+
+import dev.geco.gholo.GHoloMain;
 
 public class UManager {
 
-    private final Plugin pl;
+    private final GHoloMain GPM;
 
-    private final String r;
+    private String spigotVersion = null;
 
-    private String s = null;
+    private boolean latestVersion = true;
 
-    private boolean v = true;
+    public UManager(GHoloMain GPluginMain) { GPM = GPluginMain; }
 
-    public UManager(Plugin Pl, String Resource) {
-        pl = Pl;
-        r = Resource;
-    }
+    public void checkForUpdates() {
 
-    private String requestSpigotVersion() {
-        String vs = null;
-        try(Closer c = Closer.create()) {
-            HttpURLConnection con = (HttpURLConnection) new URL("https://api.spigotmc.org/legacy/update.php?resource=" + r).openConnection();
-            con.setDoOutput(true);
-            con.setRequestMethod("GET");
-            con.setConnectTimeout(1000);
-            vs = c.register(new BufferedReader(c.register(new InputStreamReader(con.getInputStream())))).readLine();
-        } catch(IOException e) { }
-        return vs;
-    }
+        if(GPM.getCManager().CHECK_FOR_UPDATE) {
 
-    public String getPluginVersion() { return pl.getDescription().getVersion(); }
+            checkVersion();
 
-    public String getLatestVersion() { return s; }
+            if(!latestVersion) {
 
-    public boolean checkVersion() {
-        s = requestSpigotVersion();
-        String cv = getPluginVersion();
-        if(s == null || cv == null) return true;
-        List<Integer> pl = new ArrayList<>(), vl = new ArrayList<>();
-        for(String i : shortVersion(cv).split("\\.")) pl.add(Integer.parseInt(i));
-        for(String i : shortVersion(s).split("\\.")) vl.add(Integer.parseInt(i));
-        if(pl.size() > vl.size()) {
-            v = true;
-            return true;
-        }
-        for(int i = 0; i < pl.size(); i++) {
-            v = true;
-            if(pl.get(i) > vl.get(i)) return true;
-            else if(pl.get(i) < vl.get(i)) {
-                v = false;
-                return false;
+                for(Player player : Bukkit.getOnlinePlayers()) if(GPM.getPManager().hasPermission(player, "Update")) GPM.getMManager().sendMessage(player, "Plugin.plugin-update", "%Name%", GPM.NAME, "%NewVersion%", spigotVersion, "%Version%", GPM.getDescription().getVersion(), "%Path%", GPM.getDescription().getWebsite());
+
+                GPM.getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-update", "%Name%", GPM.NAME, "%NewVersion%", spigotVersion, "%Version%", GPM.getDescription().getVersion(), "%Path%", GPM.getDescription().getWebsite());
             }
         }
-        return v;
     }
 
-    public boolean isLatestVersion() { return v; }
+    public void loginCheckForUpdates(Player Player) {
+
+        if(GPM.getCManager().CHECK_FOR_UPDATE && !latestVersion) {
+
+            if(GPM.getPManager().hasPermission(Player, "Update")) GPM.getMManager().sendMessage(Player, "Plugin.plugin-update", "%Name%", GPM.NAME, "%NewVersion%", spigotVersion, "%Version%", GPM.getDescription().getVersion(), "%Path%", GPM.getDescription().getWebsite());
+        }
+    }
+
+    private String getSpigotVersion() {
+
+        String version = null;
+
+        try(Closer closer = Closer.create()) {
+
+            HttpURLConnection urlConnection = (HttpURLConnection) new URL("https://api.spigotmc.org/legacy/update.php?resource=" + GPM.RESOURCE).openConnection();
+
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setConnectTimeout(1000);
+
+            version = closer.register(new BufferedReader(closer.register(new InputStreamReader(urlConnection.getInputStream())))).readLine();
+        } catch (Exception ignored) { }
+
+        return version;
+    }
+
+    private void checkVersion() {
+
+        try {
+
+            spigotVersion = getSpigotVersion();
+
+            String pluginVersion = GPM.getDescription().getVersion();
+
+            if(spigotVersion == null) return;
+
+            List<Integer> versionString = new ArrayList<>(), vl = new ArrayList<>();
+
+            for(String i : shortVersion(pluginVersion).split("\\.")) versionString.add(Integer.parseInt(i));
+
+            for(String i : shortVersion(spigotVersion).split("\\.")) vl.add(Integer.parseInt(i));
+
+            if(versionString.size() > vl.size()) {
+
+                latestVersion = true;
+
+                return;
+            }
+
+            for(int i = 0; i < versionString.size(); i++) {
+
+                latestVersion = true;
+
+                if(versionString.get(i) > vl.get(i)) return;
+                else if(versionString.get(i) < vl.get(i)) {
+
+                    latestVersion = false;
+                    return;
+                }
+            }
+        } catch (Exception | Error e) { latestVersion = true; }
+    }
 
     private String shortVersion(String V) { return V.replace(" ", "").replace("[", "").replace("]", ""); }
 
-    public boolean updatePlugin() {
-
-
-
-        return false;
-
-    }
-
     private static class Closer implements Closeable {
 
-        private final List<Closeable> l = new ArrayList<Closeable>();
+        private final List<Closeable> l = new ArrayList<>();
 
         public static Closer create() { return new Closer(); }
 
         public <C extends Closeable> C register(C c) {
+
             l.add(c);
+
             return c;
         }
 
         @Override
         public void close() { for(Closeable c : l) closeQuietly(c); }
 
-        public void closeQuietly(Closeable c) { try { c.close(); } catch (Throwable e) { } }
-
+        public void closeQuietly(Closeable c) { try { c.close(); } catch (Exception ignored) { } }
     }
 
 }
