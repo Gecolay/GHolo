@@ -314,7 +314,7 @@ public class GHoloCommand implements CommandExecutor {
                     break;
                 case "import":
                     if(Args.length > 1) {
-                        if(HoloImportManager.PLUGIN_IMPORTS.contains(Args[1].toLowerCase())) {
+                        if(GPM.getHoloImportManager().PLUGIN_IMPORTS.contains(Args[1].toLowerCase())) {
                             boolean imported = GPM.getHoloImportManager().importFromPlugin(Args[1]);
                             if(imported) {
                                 GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-import-plugin", "%Plugin%", Args[1].toLowerCase());

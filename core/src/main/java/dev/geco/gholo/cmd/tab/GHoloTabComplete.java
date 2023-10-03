@@ -52,7 +52,7 @@ public class GHoloTabComplete implements TabCompleter {
                 if(GPM.getPManager().hasPermission(Sender, "Holo")) {
 
                     if(Args[0].equalsIgnoreCase("info") || Args[0].equalsIgnoreCase("remove") || Args[0].equalsIgnoreCase("tp") || Args[0].equalsIgnoreCase("tphere") || Args[0].equalsIgnoreCase("tpto") || Args[0].equalsIgnoreCase("addrow") || Args[0].equalsIgnoreCase("removerow") || Args[0].equalsIgnoreCase("setrow") || Args[0].equalsIgnoreCase("insertrow") || Args[0].equalsIgnoreCase("copy") || Args[0].equalsIgnoreCase("range") || Args[0].equalsIgnoreCase("align") || Args[0].equalsIgnoreCase("condition") || Args[0].equalsIgnoreCase("image")) for(GHolo holo : GPM.getHoloManager().getHolos()) complete.add(holo.getId());
-                    if(Args[0].equalsIgnoreCase("import")) complete.addAll(HoloImportManager.PLUGIN_IMPORTS);
+                    if(Args[0].equalsIgnoreCase("import")) complete.addAll(GPM.getHoloImportManager().PLUGIN_IMPORTS);
                 }
             } else if(Args.length == 3) {
 
