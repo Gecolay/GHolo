@@ -83,6 +83,7 @@ abstract public class MManager {
     public MManager(GHoloMain GPluginMain) {
         GPM = GPluginMain;
         try { Class.forName("net.md_5.bungee.api.ChatMessageType"); } catch (Throwable e) { allowBungeeMessages = false; }
+        loadMessages();
     }
 
     public FileConfiguration getMessages() { return getMessages(DEFAULT_LANG); }

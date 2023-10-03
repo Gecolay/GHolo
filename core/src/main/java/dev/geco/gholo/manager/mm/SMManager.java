@@ -10,10 +10,7 @@ import dev.geco.gholo.manager.*;
 
 public class SMManager extends MManager {
 
-    public SMManager(GHoloMain GPluginMain) {
-        super(GPluginMain);
-        loadMessages();
-    }
+    public SMManager(GHoloMain GPluginMain) { super(GPluginMain); }
 
     public void sendMessage(CommandSender Target, String Message, Object... ReplaceList) { Target.sendMessage(getLanguageMessage(Message, getLanguage(Target), ReplaceList)); }
 

@@ -24,6 +24,8 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
     private final HashMap<GHolo, List<GHoloRow>> holos = new HashMap<>();
 
+    private final HashMap<UUID, HashMap<Integer, String>> cache = new HashMap<>();
+
     public void registerHolo(GHolo Holo) {
 
         unregisterHolo(Holo);
@@ -55,7 +57,11 @@ public class HoloSpawnManager implements IHoloSpawnManager {
         } catch (Throwable e) { e.printStackTrace(); }
     }
 
-    public void unregisterHolo(GHolo Holo) { unregisterHolo(Holo, true); }
+    public void unregisterHolo(GHolo Holo) {
+
+        unregisterHolo(Holo, true);
+        cache.clear();
+    }
 
     public void unregisterHolo(GHolo Holo, boolean Remove) {
 
@@ -117,23 +123,29 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                         if(!player.isOnline()) continue;
 
+                        if(holoRow.needUpdate()) rowContent = GPM.getFormatUtil().formatPlaceholders(rowContent, player);
+
+                        UUID uuid = player.getUniqueId();
+
+                        if(cache.containsKey(uuid) && rowContent.equals(cache.get(uuid).get(holoRow.getBase().getId()))) continue;
+
                         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
 
-                        String text = GPM.getFormatUtil().formatSymbols(rowContent);
+                        holoRow.getBase().setCustomNameVisible(!rowContent.equalsIgnoreCase("[]"));
 
-                        if(holoRow.needUpdate()) text = GPM.getFormatUtil().formatPlaceholders(text, player);
-
-                        //check if customName is diff from last time, if not cancel here
-
-                        holoRow.getBase().setCustomNameVisible(!text.equalsIgnoreCase("[]"));
-
-                        holoRow.getBase().setCustomNameVisible(true);
-
-                        try { holoRow.getBase().setCustomName(CraftChatMessage.fromString(text)[0]); } catch (Exception e) { e.printStackTrace(); }
+                        try { holoRow.getBase().setCustomName(CraftChatMessage.fromString(rowContent)[0]); } catch (Exception e) { e.printStackTrace(); }
 
                         if(!holo.getUUIDs().contains(player.getUniqueId())) serverPlayer.connection.send(new ClientboundAddEntityPacket(holoRow.getBase()));
 
                         serverPlayer.connection.send(new ClientboundSetEntityDataPacket(holoRow.getBase().getId(), holoRow.getBase().getEntityData().isDirty() ? holoRow.getBase().getEntityData().packDirty() : holoRow.getBase().getEntityData().getNonDefaultValues()));
+
+                        player.sendMessage("Update:" + rowContent);
+
+                        HashMap<Integer, String> playerCache = cache.getOrDefault(uuid, new HashMap<>());
+
+                        playerCache.put(holoRow.getBase().getId(), rowContent);
+
+                        cache.put(uuid, playerCache);
                     }
 
                     if(despawnPlayers.size() > 0) {

@@ -107,7 +107,7 @@ public class GHoloMain extends JavaPlugin {
 
         preloadPluginDependencies();
 
-        mManager = isBasicPaperBased() ? new PMManager(getInstance()) : new SMManager(getInstance());
+        mManager = isBasicPaperBased() && GPM.getSVManager().isNewerOrVersion(18, 2) ? new PMManager(getInstance()) : new SMManager(getInstance());
     }
 
     public void onEnable() {

@@ -7,8 +7,6 @@ import org.jetbrains.annotations.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.*;
 
-import net.md_5.bungee.api.*;
-
 import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.minimessage.*;
 
@@ -17,26 +15,15 @@ import dev.geco.gholo.manager.*;
 
 public class PMManager extends MManager {
 
-    private boolean allowComponentMessages = GPM.getSVManager().isNewerOrVersion(18, 2);
+    public PMManager(GHoloMain GPluginMain) { super(GPluginMain); }
 
-    public PMManager(GHoloMain GPluginMain) {
-        super(GPluginMain);
-        try {
-            Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
-            Class.forName("net.kyori.adventure.text.Component");
-            Class.forName("net.kyori.adventure.audience.Audience");
-        } catch (Throwable e) { allowComponentMessages = false; }
-        loadMessages();
-    }
-
-    private @Nullable Component toFormattedComponent(String Text, Object... RawReplaceList) {
+    private Component toFormattedComponent(String Text, Object... RawReplaceList) {
         String text = Text;
-        if(!allowComponentMessages) return null;
         for(Map.Entry<String, String> tag : TAGS.entrySet()) text = text.replace(PRE_FORMAT_COLOR_CHAR + tag.getKey(), tag.getValue()).replace(PRE_FORMAT_COLOR_CHAR + tag.getKey().toUpperCase(), tag.getValue()).replace(org.bukkit.ChatColor.COLOR_CHAR + tag.getKey(), tag.getValue()).replace(org.bukkit.ChatColor.COLOR_CHAR + tag.getKey().toUpperCase(), tag.getValue());
         text = text.replaceAll("(?<!<color:)#[a-fA-F0-9]{6}(?<!>)", "<color:$0>");
         text = fixMiniMessageFormat(text);
         Component component;
-        try { component = MiniMessage.miniMessage().deserialize(text); } catch (Throwable e) { component = Component.text(toFormattedMessage(Text)); }
+        try { component = MiniMessage.miniMessage().deserialize(text); } catch (Throwable e) { component = Component.text(super.toFormattedMessage(Text)); }
         if(RawReplaceList.length > 0 && RawReplaceList.length % 2 == 0) for(int count = 0; count < RawReplaceList.length; count += 2) if(RawReplaceList[count] != null && RawReplaceList[count + 1] != null) {
             int finalCount = count;
             component = component.replaceText((b) -> {
@@ -105,24 +92,14 @@ public class PMManager extends MManager {
 
     private Component getLanguageComponent(String Message, String LanguageCode, Object... ReplaceList) { return toFormattedComponent(getRawLanguageMessage(Message, LanguageCode, ReplaceList)); }
 
-    public void sendMessage(CommandSender Target, String Message, Object... ReplaceList) {
-        try {
-            if(allowComponentMessages) {
-                Target.sendMessage(getLanguageComponent(Message, getLanguage(Target), ReplaceList));
-                return;
-            }
-        } catch (Throwable ignored) { }
-        Target.sendMessage(getLanguageMessage(Message, getLanguage(Target), ReplaceList));
+    public String toFormattedMessage(String Text, Object... RawReplaceList) {
+        String message = super.toFormattedMessage(Text, RawReplaceList);
+        for(Map.Entry<String, String> entry : TAGS.entrySet()) message = message.replace(entry.getValue(), PRE_FORMAT_COLOR_CHAR +  entry.getKey()).replace(entry.getValue().replace("<", "</"), "");
+        return org.bukkit.ChatColor.translateAlternateColorCodes(PRE_FORMAT_COLOR_CHAR, message);
     }
 
-    public void sendActionBarMessage(Player Target, String Message, Object... ReplaceList) {
-        try {
-            if(allowComponentMessages) {
-                Target.sendActionBar((Component) getLanguageComponent(Message, getLanguage(Target), ReplaceList));
-                return;
-            }
-        } catch (Throwable ignored) { }
-        if(allowBungeeMessages) Target.spigot().sendMessage(ChatMessageType.ACTION_BAR, net.md_5.bungee.api.chat.TextComponent.fromLegacyText(getLanguageMessage(Message, getLanguage(Target), ReplaceList)));
-    }
+    public void sendMessage(CommandSender Target, String Message, Object... ReplaceList) { Target.sendMessage(getLanguageComponent(Message, getLanguage(Target), ReplaceList)); }
+
+    public void sendActionBarMessage(Player Target, String Message, Object... ReplaceList) { Target.sendActionBar(getLanguageComponent(Message, getLanguage(Target), ReplaceList)); }
 
 }

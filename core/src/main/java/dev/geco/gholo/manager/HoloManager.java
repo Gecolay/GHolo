@@ -89,7 +89,12 @@ public class HoloManager {
                     Location location = new Location(world, x, y, z);
                     List<String> content = new ArrayList<>();
                     ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holos_content WHERE id = ?", id);
-                    while(resultSetContent.next()) content.add(resultSetContent.getString("content"));
+                    while(resultSetContent.next()) {
+                        String contentRow = resultSetContent.getString("content");
+                        contentRow = GPM.getFormatUtil().formatSymbols(contentRow);
+                        contentRow = GPM.getMManager().toFormattedMessage(contentRow);
+                        content.add(contentRow);
+                    }
                     int range = resultSet.getInt("range");
                     GHolo holo = new GHolo(id, location, content, range);
                     if(!holo_updates.containsKey(id)) {
