@@ -1,7 +1,10 @@
 Lang:
 
   # Defines the plugin language
-  lang: en_en
+  lang: en_us
+
+  # Defines whether the client language should be used, if it is available
+  client-lang: true
 
 
 
@@ -10,10 +13,17 @@ Options:
   # Defines whether the plugin should notify when a new version is available
   check-for-update: true
 
-  # Defines the space between the top part of two rows
+  # Defines the default space between the top part of two rows
   space-between-lines: 0.26
 
-  # Defines a list of unicode symbols, which are to be converted within holo rows
+  Link:
+
+    # Defines whether the PlaceholderAPI link should be active
+    placeholder-api: true
+
+
+
+  # Defines a list of Unicode symbols to be converted within holo rows
   Symbols:
 
     "[X]": "\u2588"

@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 
 import org.bukkit.configuration.file.*;
-import org.bukkit.scheduler.*;
 
 import dev.geco.gholo.GHoloMain;
 import dev.geco.gholo.objects.*;
@@ -17,7 +16,7 @@ public class HoloAnimationManager {
 
     private final HashMap<String, GHoloAnimation> animations = new HashMap<>();
 
-    private BukkitRunnable bukkitRunnable;
+    private UUID taskId;
 
     public HashMap<String, GHoloAnimation> getAnimationSet() { return animations; }
 
@@ -40,40 +39,32 @@ public class HoloAnimationManager {
 
         try {
 
-            for(String id : animationsData.getConfigurationSection("Animations").getKeys(false)) {
+            for(String id : Objects.requireNonNull(animationsData.getConfigurationSection("Animations")).getKeys(false)) {
 
                 animations.put(id.toLowerCase(), new GHoloAnimation(id.toLowerCase(), animationsData.getLong("Animations." + id + ".ticks", 20), animationsData.getStringList("Animations." + id + ".content")));
             }
 
             startHoloAnimations();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Throwable e) { e.printStackTrace(); }
     }
 
     private void startHoloAnimations() {
 
-        bukkitRunnable = new BukkitRunnable() {
-            @Override
-            public void run() {
+        taskId = GPM.getTManager().runAtFixedRate(() -> {
 
-                for(GHoloAnimation animation : animations.values()) {
+            for(GHoloAnimation animation : animations.values()) {
 
-                    animation.setCurrentTick(animation.getCurrentTick() + 1);
+                animation.setCurrentTick(animation.getCurrentTick() + 1);
 
-                    if(animation.getCurrentTick() >= animation.getTicks()) {
+                if(animation.getCurrentTick() < animation.getTicks()) continue;
 
-                        animation.setRow(animation.getRow() + 1 >= animation.getContent().size() ? 0 : animation.getRow() + 1);
+                animation.setRow(animation.getRow() + 1 >= animation.getContent().size() ? 0 : animation.getRow() + 1);
 
-                        animation.setCurrentTick(0);
-                    }
-                }
+                animation.setCurrentTick(0);
             }
-        };
-
-        bukkitRunnable.runTaskTimerAsynchronously(GPM, 0, 1);
+        }, false, 0, 1);
     }
 
-    public void stopHoloAnimations() { if(bukkitRunnable != null) bukkitRunnable.cancel(); }
+    public void stopHoloAnimations() { if(taskId != null) GPM.getTManager().cancel(taskId); }
 
 }

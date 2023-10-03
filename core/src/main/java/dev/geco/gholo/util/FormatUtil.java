@@ -18,7 +18,7 @@ public class FormatUtil {
     public String formatPlaceholders(String Text, Player Player) {
         String text = Text;
         for(Entry<String, GHoloAnimation> animation : GPM.getHoloAnimationManager().getAnimationSet().entrySet()) text = text.replace("%" + animation.getKey() + "%", animation.getValue().getCurrentContent());
-        text = GPM.getPlaceholderAPILink() != null ? PlaceholderAPI.setPlaceholders(Player, text) : text;
+        text = GPM.getCManager().L_PLACEHOLDER_API && GPM.getPlaceholderAPILink() ? PlaceholderAPI.setPlaceholders(Player, text) : text;
         text = GPM.getMManager().toFormattedMessage(text);
         return text;
     }

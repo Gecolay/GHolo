@@ -12,9 +12,16 @@ public class CManager {
 
     public String L_LANG;
 
+    public boolean L_CLIENT_LANG;
+
+
     public boolean CHECK_FOR_UPDATE;
 
     public double SPACE_BETWEEN_LINES;
+
+
+    public boolean L_PLACEHOLDER_API;
+
 
     public HashMap<String, String> SYMBOLS = new HashMap<>();
 
@@ -25,7 +32,7 @@ public class CManager {
 
         GPM = GPluginMain;
 
-        if(NMSManager.isNewerOrVersion(18, 2)) {
+        if(GPM.getSVManager().isNewerOrVersion(18, 2)) {
             try {
                 File configFile = new File(GPM.getDataFolder(), "config.yml");
                 FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
@@ -41,8 +48,7 @@ public class CManager {
                     }
                 }
                 config.save(configFile);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
                 GPM.saveDefaultConfig();
             }
         } else GPM.saveDefaultConfig();
@@ -54,16 +60,20 @@ public class CManager {
 
         GPM.reloadConfig();
 
-        L_LANG = GPM.getConfig().getString("Lang.lang", "en_en").toLowerCase();
+        L_LANG = GPM.getConfig().getString("Lang.lang", "en_us").toLowerCase();
+        L_CLIENT_LANG = GPM.getConfig().getBoolean("Lang.client-lang", true);
 
         CHECK_FOR_UPDATE = GPM.getConfig().getBoolean("Options.check-for-update", true);
         SPACE_BETWEEN_LINES = GPM.getConfig().getDouble("Options.space-between-lines", 0.26);
+
+        L_PLACEHOLDER_API = GPM.getConfig().getBoolean("Options.Link.placeholder-api", true);
+
         SYMBOLS.clear();
         try {
-            for(String symbol : GPM.getConfig().getConfigurationSection("Options.Symbols").getKeys(false)) {
-                SYMBOLS.put(symbol, "" + GPM.getConfig().getString("Options.Symbols." + symbol).toCharArray()[0]);
+            for(String symbol : Objects.requireNonNull(GPM.getConfig().getConfigurationSection("Options.Symbols")).getKeys(false)) {
+                SYMBOLS.put(symbol, String.valueOf(Objects.requireNonNull(GPM.getConfig().getString("Options.Symbols." + symbol)).toCharArray()[0]));
             }
-        } catch (Exception ignored) { }
+        } catch (Throwable ignored) { }
     }
 
 }

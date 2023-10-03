@@ -1,10 +1,11 @@
 name: ${project.parent.name}
 version: ${project.parent.version}
 description: ${project.description}
-author: Gecolay
-website: https://www.spigotmc.org/resources/
-main: dev.geco.gholo.GHoloMain
+authors: [Gecolay]
+website: https://www.spigotmc.org/resources/000000
+main: ${project.parent.groupId}.${project.parent.artifactId}Main
 api-version: 1.17
+folia-supported: true
 softdepend: [PlaceholderAPI]
 
 commands:
@@ -13,14 +14,14 @@ commands:
 
     usage: /<command>
     aliases: [holo]
-    description: Holo-Command
+    description: Holo command
     permission: GHolo.Holo
 
   gholoreload:
 
     usage: /<command>
     aliases: [gholorl]
-    description: Plugin-Reload
+    description: Plugin reload command
     permission: GHolo.Reload
 
 
@@ -29,16 +30,20 @@ permissions:
 
   GHolo.*:
     default: op
-    description: OP-Permission for all commands and features of GHolo
+    description: GHolo | Permissions
+    children:
+      GHolo.Holo: true
+      GHolo.Update: true
+      GHolo.Reload: true
 
   GHolo.Holo:
     default: op
-    description: Main-Holo | Permission
+    description: Holo command | Permission
 
   GHolo.Update:
     default: op
-    description: Update-Notification | Permission
+    description: Update notification | Permission
 
   GHolo.Reload:
     default: op
-    description: Plugin-Reload-Command | Permission
+    description: Plugin reload command | Permission

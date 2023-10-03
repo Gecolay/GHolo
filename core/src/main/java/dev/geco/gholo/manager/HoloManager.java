@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.*;
 
 import org.bukkit.*;
-import org.bukkit.scheduler.*;
 
 import dev.geco.gholo.GHoloMain;
 import dev.geco.gholo.objects.*;
@@ -13,20 +12,14 @@ public class HoloManager {
 
     private final GHoloMain GPM;
 
-    public HoloManager(GHoloMain GPluginMain) {
-
-        GPM = GPluginMain;
-        spawnmanager = (IHoloSpawnManager) NMSManager.getPackageObject("manager.HoloSpawnManager", GPM);
-    }
+    public HoloManager(GHoloMain GPluginMain) { GPM = GPluginMain; }
 
     public void createTable() {
         GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos (id TEXT, last_update INTEGER, range INTEGER, l_world TEXT, l_x REAL, l_y REAL, l_z REAL);");
         GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos_content (id TEXT, content TEXT);");
     }
 
-    private final IHoloSpawnManager spawnmanager;
-
-    private BukkitRunnable bukkitRunnable;
+    private UUID taskId;
 
     public GHolo getHolo(String Id) { return holos.stream().filter(holo -> holo.getId().equalsIgnoreCase(Id)).findFirst().orElse(null); }
 
@@ -38,7 +31,7 @@ public class HoloManager {
 
     public void unloadHolos() {
 
-        if(bukkitRunnable != null) bukkitRunnable.cancel();
+        if(taskId != null) GPM.getTManager().cancel(taskId);
 
         for(GHolo holo : getHolos()) removeHolo(holo, false);
 
@@ -52,7 +45,7 @@ public class HoloManager {
 
     public List<GHolo> getHolos() { return new ArrayList<>(holos); }
 
-    private void spawnHolo(GHolo Holo) { spawnmanager.registerHolo(Holo); }
+    private void spawnHolo(GHolo Holo) { GPM.getHoloSpawnManager().registerHolo(Holo); }
 
     public void saveHolo(GHolo Holo) {
 
@@ -70,7 +63,7 @@ public class HoloManager {
 
     public void removeHolo(GHolo Holo, boolean Database) {
         holos.remove(Holo);
-        spawnmanager.unregisterHolo(Holo);
+        GPM.getHoloSpawnManager().unregisterHolo(Holo);
         if(!Database) return;
         GPM.getDManager().execute("DELETE FROM holos WHERE id = ?", Holo.getId());
         GPM.getDManager().execute("DELETE FROM holos_content WHERE id = ?", Holo.getId());
@@ -78,52 +71,45 @@ public class HoloManager {
 
     public void loadHolos() {
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
+        GPM.getTManager().runDelayed(() -> {
 
-                try {
+            try {
 
-                    ResultSet resultSet = GPM.getDManager().executeAndGet("SELECT * FROM holos");
+                ResultSet resultSet = GPM.getDManager().executeAndGet("SELECT * FROM holos");
 
-                    while(resultSet.next()) {
-                        String id = resultSet.getString("id");
-                        long lastUpdate = resultSet.getLong("last_update");
-                        World world = Bukkit.getWorld(resultSet.getString("l_world"));
-                        double x = resultSet.getDouble("l_x");
-                        double y = resultSet.getDouble("l_y");
-                        double z = resultSet.getDouble("l_z");
-                        if(world == null) continue;
-                        Location location = new Location(world, x, y, z);
-                        List<String> content = new ArrayList<>();
-                        ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holos_content WHERE id = ?", id);
-                        while(resultSetContent.next()) content.add(resultSetContent.getString("content"));
-                        int range = resultSet.getInt("range");
-                        GHolo holo = new GHolo(id, location, content, range);
-                        if(!holo_updates.containsKey(id)) {
-                            holos.add(holo);
-                            holo_updates.put(id, lastUpdate);
-                        } else if(holo_updates.get(id) >= lastUpdate) continue;
-                        spawnHolo(holo);
-                    }
+                while(resultSet.next()) {
 
-                    List<GHolo> remove = new ArrayList<>();
-                    for(GHolo holo : getHolos()) if(!holo_updates.containsKey(holo.getId())) remove.add(holo);
-                    for(GHolo holo : remove) removeHolo(holo, false);
+                    String id = resultSet.getString("id");
+                    long lastUpdate = resultSet.getLong("last_update");
+                    World world = Bukkit.getWorld(resultSet.getString("l_world"));
+                    double x = resultSet.getDouble("l_x");
+                    double y = resultSet.getDouble("l_y");
+                    double z = resultSet.getDouble("l_z");
+                    if(world == null) continue;
+                    Location location = new Location(world, x, y, z);
+                    List<String> content = new ArrayList<>();
+                    ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holos_content WHERE id = ?", id);
+                    while(resultSetContent.next()) content.add(resultSetContent.getString("content"));
+                    int range = resultSet.getInt("range");
+                    GHolo holo = new GHolo(id, location, content, range);
+                    if(!holo_updates.containsKey(id)) {
+                        holos.add(holo);
+                        holo_updates.put(id, lastUpdate);
+                    } else if(holo_updates.get(id) >= lastUpdate) continue;
+                    spawnHolo(holo);
+                }
 
-                } catch (Exception e) { e.printStackTrace(); }
+                List<GHolo> remove = new ArrayList<>();
+                for(GHolo holo : getHolos()) if(!holo_updates.containsKey(holo.getId())) remove.add(holo);
+                for(GHolo holo : remove) removeHolo(holo, false);
 
-                bukkitRunnable = new BukkitRunnable() {
+            } catch (Throwable e) { e.printStackTrace(); }
 
-                    @Override
-                    public void run() {
+            taskId = GPM.getTManager().runAtFixedRate(() -> {
 
-                        spawnmanager.spawn();
-                    }
-                };
-
-                bukkitRunnable.runTaskTimer(GPM, 0, 2);
-            }
-        }.runTaskLater(GPM, 3);
+                GPM.getHoloSpawnManager().spawn();
+            }, 0, 2);
+        }, 3);
     }
+
 }

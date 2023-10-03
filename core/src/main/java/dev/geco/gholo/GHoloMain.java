@@ -2,6 +2,7 @@ package dev.geco.gholo;
 
 import org.bukkit.*;
 import org.bukkit.command.*;
+import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.*;
 
 import dev.geco.gholo.api.event.*;
@@ -10,9 +11,13 @@ import dev.geco.gholo.cmd.tab.*;
 import dev.geco.gholo.events.*;
 import dev.geco.gholo.link.*;
 import dev.geco.gholo.manager.*;
+import dev.geco.gholo.manager.mm.*;
 import dev.geco.gholo.util.*;
 
 public class GHoloMain extends JavaPlugin {
+
+    private SVManager svManager;
+    public SVManager getSVManager() { return svManager; }
 
     private CManager cManager;
     public CManager getCManager() { return cManager; }
@@ -20,14 +25,17 @@ public class GHoloMain extends JavaPlugin {
     private DManager dManager;
     public DManager getDManager() { return dManager; }
 
+    private HoloManager holoManager;
+    public HoloManager getHoloManager() { return holoManager; }
+
+    private IHoloSpawnManager holoSpawnManager;
+    public IHoloSpawnManager getHoloSpawnManager() { return holoSpawnManager; }
+
     private HoloAnimationManager holoAnimationManager;
     public HoloAnimationManager getHoloAnimationManager() { return holoAnimationManager; }
 
     private HoloImportManager holoImportManager;
     public HoloImportManager getHoloImportManager() { return holoImportManager; }
-
-    private HoloManager holoManager;
-    public HoloManager getHoloManager() { return holoManager; }
 
     private UManager uManager;
     public UManager getUManager() { return uManager; }
@@ -35,26 +43,38 @@ public class GHoloMain extends JavaPlugin {
     private PManager pManager;
     public PManager getPManager() { return pManager; }
 
+    private TManager tManager;
+    public TManager getTManager() { return tManager; }
+
     private MManager mManager;
     public MManager getMManager() { return mManager; }
 
     private FormatUtil formatUtil;
     public FormatUtil getFormatUtil() { return formatUtil; }
 
-    private PlaceholderAPILink placeholderAPILink;
-    public PlaceholderAPILink getPlaceholderAPILink() { return placeholderAPILink; }
+    private boolean placeholderAPILink;
+    public boolean getPlaceholderAPILink() { return placeholderAPILink; }
+
+    private boolean spigotBased = false;
+    public boolean isSpigotBased() { return spigotBased; }
+
+    private boolean basicPaperBased = false;
+    public boolean isBasicPaperBased() { return basicPaperBased; }
+
+    private boolean paperBased = false;
+    public boolean isPaperBased() { return paperBased; }
 
     public final String NAME = "GHolo";
 
-    public final String RESOURCE = "";
+    public final String RESOURCE = "000000";
 
     private static GHoloMain GPM;
 
     public static GHoloMain getInstance() { return GPM; }
 
-    private void loadSettings() {
+    private void loadSettings(CommandSender Sender) {
 
-        dManager.connect();
+        if(!connectDatabase(Sender)) return;
 
         getHoloManager().createTable();
 
@@ -73,24 +93,29 @@ public class GHoloMain extends JavaPlugin {
 
         GPM = this;
 
+        svManager = new SVManager(getInstance());
         dManager = new DManager(getInstance());
         cManager = new CManager(getInstance());
         uManager = new UManager(getInstance());
         pManager = new PManager(getInstance());
-        mManager = new MManager(getInstance());
+        tManager = new TManager(getInstance());
+        holoManager = new HoloManager(getInstance());
         holoAnimationManager = new HoloAnimationManager(getInstance());
         holoImportManager = new HoloImportManager(getInstance());
 
         formatUtil = new FormatUtil(getInstance());
+
+        preloadPluginDependencies();
+
+        mManager = isBasicPaperBased() ? new PMManager(getInstance()) : new SMManager(getInstance());
     }
 
     public void onEnable() {
 
+        loadSettings(Bukkit.getConsoleSender());
         if(!versionCheck()) return;
 
-        holoManager = new HoloManager(getInstance());
-
-        loadSettings();
+        holoSpawnManager = (IHoloSpawnManager) GPM.getSVManager().getPackageObject("manager.HoloSpawnManager", getInstance());
 
         setupCommands();
         setupEvents();
@@ -104,11 +129,9 @@ public class GHoloMain extends JavaPlugin {
 
     public void onDisable() {
 
-        dManager.close();
+        getDManager().close();
         getHoloAnimationManager().stopHoloAnimations();
         getHoloManager().unloadHolos();
-
-        if(getPlaceholderAPILink() != null) getPlaceholderAPILink().unregister();
 
         getMManager().sendMessage(Bukkit.getConsoleSender(), "Plugin.plugin-disabled");
     }
@@ -117,8 +140,10 @@ public class GHoloMain extends JavaPlugin {
 
         getCommand("gholo").setExecutor(new GHoloCommand(getInstance()));
         getCommand("gholo").setTabCompleter(new GHoloTabComplete(getInstance()));
+        getCommand("gholo").setPermissionMessage(getMManager().getMessage("Messages.command-permission-error"));
         getCommand("gholoreload").setExecutor(new GHoloReloadCommand(getInstance()));
         getCommand("gholoreload").setTabCompleter(new EmptyTabComplete());
+        getCommand("gholoreload").setPermissionMessage(getMManager().getMessage("Messages.command-permission-error"));
     }
 
     private void setupEvents() {
@@ -126,15 +151,32 @@ public class GHoloMain extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerEvents(getInstance()), getInstance());
     }
 
-    private void preloadPluginDependencies() { }
+    private void preloadPluginDependencies() {
+
+        try {
+            Class.forName("org.spigotmc.event.entity.EntityDismountEvent");
+            spigotBased = true;
+        } catch (ClassNotFoundException ignored) { }
+
+        try {
+            Class.forName("io.papermc.paper.event.entity.EntityMoveEvent");
+            basicPaperBased = true;
+        } catch (ClassNotFoundException ignored) { }
+
+        try {
+            Class.forName("io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler");
+            paperBased = true;
+        } catch (ClassNotFoundException ignored) { }
+    }
 
     private void loadPluginDependencies(CommandSender Sender) {
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null && Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            placeholderAPILink = new PlaceholderAPILink(getInstance());
-            getMManager().sendMessage(Sender, "Plugin.plugin-link", "%Link%", "PlaceholderAPI");
-            getPlaceholderAPILink().register();
-        } else placeholderAPILink = null;
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+
+        if(plugin != null && plugin.isEnabled()) {
+            placeholderAPILink = true;
+            getMManager().sendMessage(Sender, "Plugin.plugin-link", "%Link%", plugin.getName());
+        } else placeholderAPILink = false;
     }
 
     public void reload(CommandSender Sender) {
@@ -144,20 +186,31 @@ public class GHoloMain extends JavaPlugin {
         getCManager().reload();
         getMManager().loadMessages();
 
-        dManager.close();
+        getDManager().close();
         getHoloAnimationManager().stopHoloAnimations();
         getHoloManager().unloadHolos();
 
-        if(getPlaceholderAPILink() != null) getPlaceholderAPILink().unregister();
-
-        loadSettings();
+        loadSettings(Sender);
         loadPluginDependencies(Sender);
         GPM.getUManager().checkForUpdates();
     }
 
+    private boolean connectDatabase(CommandSender Sender) {
+
+        boolean connect = getDManager().connect();
+
+        if(connect) return true;
+
+        getMManager().sendMessage(Sender, "Plugin.plugin-data");
+
+        Bukkit.getPluginManager().disablePlugin(getInstance());
+
+        return false;
+    }
+
     private boolean versionCheck() {
 
-        if(!NMSManager.hasPackageClass("manager.HoloSpawnManager")) {
+        if(!getSVManager().hasPackageClass("manager.HoloSpawnManager")) {
 
             String version = Bukkit.getServer().getClass().getPackage().getName();
 

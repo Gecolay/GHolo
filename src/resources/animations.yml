@@ -4,12 +4,12 @@
 # An animation contains a tick amount that defines how quickly the animation is updated in ticks
 # The content of the animation defines which lines should be looped through
 #
-# ColorCodes and PlaceholderAPI placeholders can be used in an animation
+# PlaceholderAPI placeholders can be used in an animation, if active
 #
 # Animations can contain other animations, but only those created before the containing animation
-# In the example with "test" and "test2" -> only "test2" may contain "test" but "test" may not contain "test2"
+# In the default example with "test" and "test_2" -> only "test2" may contain "test" but "test" may not contain "test_2"
 #
-# You can insert an Animation in the format "%animation_id%" like "%test%"
+# You can insert an animation in the format "%animation_id%" like "%test%"
 #
 # ===============================================================================================
 
@@ -23,7 +23,7 @@ Animations:
     - "Test"
     - "Animation"
 
-  "test2":
+  "test_2":
 
     ticks: 5
 

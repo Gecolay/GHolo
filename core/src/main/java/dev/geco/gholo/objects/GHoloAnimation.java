@@ -4,9 +4,9 @@ import java.util.*;
 
 public class GHoloAnimation {
 
-    private String id;
+    private final String id;
 
-    private long ticks;
+    private final long ticks;
 
     private long currentTick = 0;
 
@@ -15,6 +15,7 @@ public class GHoloAnimation {
     private int row = 0;
 
     public GHoloAnimation(String Id, long Ticks, List<String> Content) {
+
         id = Id;
         ticks = Ticks;
         content = Content;
@@ -22,11 +23,7 @@ public class GHoloAnimation {
 
     public String getId() { return id; }
 
-    public void setId(String Id) { id = Id; }
-
     public long getTicks() { return ticks; }
-
-    public void setTicks(long Ticks) { ticks = Ticks; }
 
     public long getCurrentTick() { return currentTick; }
 
