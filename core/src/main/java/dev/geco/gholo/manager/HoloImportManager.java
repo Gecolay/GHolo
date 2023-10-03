@@ -30,11 +30,9 @@ public class HoloImportManager {
                 case "decent_holograms": return importDecentHolograms();
                 default: return false;
             }
-        } catch (Throwable e) {
+        } catch (Throwable e) { e.printStackTrace(); }
 
-            e.printStackTrace();
-            return false;
-        }
+        return false;
     }
 
     private boolean importHolographicDisplays() {
