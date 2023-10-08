@@ -7,6 +7,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.*;
 
 import dev.geco.gholo.GHoloMain;
+import dev.geco.gholo.objects.*;
 
 public class HoloImportManager {
 
@@ -68,11 +69,14 @@ public class HoloImportManager {
 
             if(world == null) continue;
 
-            List<String> finalContent = fileContent.getStringList(line + ".lines");
+            List<String> rows = fileContent.getStringList(line + ".lines");
             List<String> removeContent = fileContent.getStringList(line + ".lines");
-            for(String removeContentLine : removeContent) if(removeContentLine.equalsIgnoreCase("null")) finalContent.remove("null");
+            for(String removeContentLine : removeContent) if(removeContentLine.equalsIgnoreCase("null")) rows.remove("null");
 
-            GPM.getHoloManager().insertHolo(line, new Location(world, Double.parseDouble(args[1]), Double.parseDouble(args[2]) - 0.51, Double.parseDouble(args[3])), finalContent);
+            List<GHoloRow> holoRows = new ArrayList<>();
+            for(String row : rows) holoRows.add(new GHoloRow(row));
+
+            GPM.getHoloManager().insertHolo(line, new Location(world, Double.parseDouble(args[1]), Double.parseDouble(args[2]) - 0.51, Double.parseDouble(args[3])), holoRows);
 
             imported = true;
         }
@@ -108,7 +112,7 @@ public class HoloImportManager {
 
             Location location = new Location(world, Double.parseDouble(args[1].replace(",", ".")), Double.parseDouble(args[2].replace(",", ".")) - 0.41, Double.parseDouble(args[3].replace(",", ".")));
 
-            List<String> finalContent = new ArrayList<>();
+            List<GHoloRow> holoRows = new ArrayList<>();
 
             for(Object section : Objects.requireNonNull(fileContent.getList("pages"))) {
 
@@ -124,11 +128,11 @@ public class HoloImportManager {
 
                     String content = (String) ((LinkedHashMap<?, ?>) contentMap).get("content");
 
-                    finalContent.add(content);
+                    holoRows.add(new GHoloRow(content));
                 }
             }
 
-            GPM.getHoloManager().insertHolo(name, location, finalContent, range);
+            GPM.getHoloManager().insertHolo(name, location, holoRows, range);
 
             imported = true;
         }

@@ -109,5 +109,5 @@ GHoloHelp:
 GHoloInfo:
 
   header: "&7------------ [&6Holo&7] ------------"
-  row: "&b%RowId%&7.&r %Row%"
+  row: "&b%Row%&7.&r %Content%"
   footer: "&7------------------------------"

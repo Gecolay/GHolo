@@ -77,6 +77,7 @@ public class GHoloMain extends JavaPlugin {
         if(!connectDatabase(Sender)) return;
 
         getHoloManager().createTable();
+        ImageUtil.generateFolder();
 
         getHoloAnimationManager().loadHoloAnimations();
         getHoloManager().loadHolos();

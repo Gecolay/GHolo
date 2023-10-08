@@ -19,8 +19,8 @@ public class HoloManager {
     public static final String EMPTY_STRING = "[]";
 
     public void createTable() {
-        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos (id TEXT, range INTEGER, l_world TEXT, l_x REAL, l_y REAL, l_z REAL);");
-        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holos_content (id TEXT, content TEXT);");
+        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holo (id TEXT, range INTEGER, l_world TEXT, l_x REAL, l_y REAL, l_z REAL);");
+        GPM.getDManager().execute("CREATE TABLE IF NOT EXISTS holo_row (id TEXT, content TEXT, height REAL);");
     }
 
     private UUID taskId;
@@ -29,9 +29,9 @@ public class HoloManager {
 
     public boolean existsHolo(String Id) { return getHolo(Id) != null; }
 
-    public void insertHolo(String Id, Location Location, List<String> Content) { insertHolo(Id, Location, Content, -1); }
+    public void insertHolo(String Id, Location Location, List<GHoloRow> HoloRows) { insertHolo(Id, Location, HoloRows, -1); }
 
-    public void insertHolo(String Id, Location Location, List<String> Content, int Range) { saveHolo(new GHolo(Id.toLowerCase(), Location, Content, Range)); }
+    public void insertHolo(String Id, Location Location, List<GHoloRow> HoloRows, int Range) { saveHolo(new GHolo(Id.toLowerCase(), Location, HoloRows, Range)); }
 
     public void unloadHolos() {
 
@@ -60,14 +60,14 @@ public class HoloManager {
 
     private void addToDatabase(GHolo Holo) {
 
-        GPM.getDManager().execute("INSERT INTO holos (id, range, l_world, l_x, l_y, l_z) VALUES (?, ?, ?, ?, ?, ?)", Holo.getId(), Holo.getRange(), Holo.getLocation().getWorld().getName(), Holo.getLocation().getX(), Holo.getLocation().getY(), Holo.getLocation().getZ());
-        for(String line : Holo.getContent()) GPM.getDManager().execute("INSERT INTO holos_content (id, content) VALUES (?, ?)", Holo.getId(), line);
+        GPM.getDManager().execute("INSERT INTO holo (id, range, l_world, l_x, l_y, l_z) VALUES (?, ?, ?, ?, ?, ?)", Holo.getId(), Holo.getRange(), Holo.getLocation().getWorld().getName(), Holo.getLocation().getX(), Holo.getLocation().getY(), Holo.getLocation().getZ());
+        for(GHoloRow holoRow : Holo.getRows()) GPM.getDManager().execute("INSERT INTO holo_row (id, content, height) VALUES (?, ?, ?)", Holo.getId(), holoRow.getContent(), holoRow.getHeight());
     }
 
     private void removeFromDatabase(GHolo Holo) {
 
-        GPM.getDManager().execute("DELETE FROM holos WHERE id = ?", Holo.getId());
-        GPM.getDManager().execute("DELETE FROM holos_content WHERE id = ?", Holo.getId());
+        GPM.getDManager().execute("DELETE FROM holo WHERE id = ?", Holo.getId());
+        GPM.getDManager().execute("DELETE FROM holo_row WHERE id = ?", Holo.getId());
     }
 
     public void updateHolo(GHolo Holo) {
@@ -88,7 +88,7 @@ public class HoloManager {
 
             try {
 
-                ResultSet resultSet = GPM.getDManager().executeAndGet("SELECT * FROM holos");
+                ResultSet resultSet = GPM.getDManager().executeAndGet("SELECT * FROM holo");
 
                 while(resultSet.next()) {
 
@@ -99,11 +99,15 @@ public class HoloManager {
                     double z = resultSet.getDouble("l_z");
                     if(world == null) continue;
                     Location location = new Location(world, x, y, z);
-                    List<String> content = new ArrayList<>();
-                    ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holos_content WHERE id = ?", id);
-                    while(resultSetContent.next()) content.add(resultSetContent.getString("content"));
+                    List<GHoloRow> holoRows = new ArrayList<>();
+                    ResultSet resultSetContent = GPM.getDManager().executeAndGet("SELECT * FROM holo_row WHERE id = ?", id);
+                    while(resultSetContent.next()) {
+                        String content = resultSetContent.getString("content");
+                        double height = resultSetContent.getDouble("height");
+                        holoRows.add(new GHoloRow(content, height));
+                    }
                     int range = resultSet.getInt("range");
-                    GHolo holo = new GHolo(id, location, content, range);
+                    GHolo holo = new GHolo(id, location, holoRows, range);
                     holos.add(holo);
                     spawnHolo(holo);
                 }

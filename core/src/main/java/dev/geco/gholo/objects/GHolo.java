@@ -15,19 +15,19 @@ public class GHolo {
 
     private Location midLocation;
 
-    private List<String> content;
+    private List<GHoloRow> holoRows;
 
     private List<Player> players = new ArrayList<>();
 
     private int range;
 
-    public GHolo(String Id, Location Location, List<String> Content) { this(Id, Location, Content, -1); }
+    public GHolo(String Id, Location Location, List<GHoloRow> HoloRows) { this(Id, Location, HoloRows, -1); }
 
-    public GHolo(String Id, Location Location, List<String> Content, int Range) {
+    public GHolo(String Id, Location Location, List<GHoloRow> HoloRows, int Range) {
 
         id = Id;
         location = Location.clone();
-        content = new ArrayList<>(Content);
+        holoRows = HoloRows;
         setRange(Range);
     }
 
@@ -41,17 +41,17 @@ public class GHolo {
 
     public void setMidLocation(Location MidLocation) { midLocation = MidLocation; }
 
-    public List<String> getContent() { return content; }
+    public List<GHoloRow> getRows() { return holoRows; }
 
-    public void addContent(String Content) { content.add(Content); }
+    public void addContent(GHoloRow HoloRow) { holoRows.add(HoloRow); }
 
-    public void removeContent(int Row) { content.remove(Row - 1); }
+    public void removeRow(int Row) { holoRows.remove(Row - 1); }
 
-    public void setContent(List<String> Content) { content = Content; }
+    public void setRows(List<GHoloRow> HoloRows) { holoRows = new ArrayList<>(HoloRows); }
 
-    public void setContent(int Row, String Content) { content.remove(Row - 1); content.add(Row - 1, Content); }
+    public void setRow(int Row, GHoloRow HoloRow) { holoRows.remove(Row - 1); holoRows.add(Row - 1, HoloRow); }
 
-    public void insertContent(int Row, String Content) { content.add(Row - 1, Content); }
+    public void insertRow(int Row, GHoloRow HoloRow) { holoRows.add(Row - 1, HoloRow); }
 
     public List<Player> getPlayers() { return players; }
 

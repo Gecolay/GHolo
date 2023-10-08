@@ -28,12 +28,19 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
     private static AtomicInteger ENTITY_COUNTER;
 
+    private Field addEntityIdField;
+
     public HoloSpawnManager(GHoloMain GHoloMain) {
         GPM = GHoloMain;
         try {
             for(Field field : Entity.class.getDeclaredFields()) if(field.getType().equals(AtomicInteger.class)) {
                 field.setAccessible(true);
                 ENTITY_COUNTER = (AtomicInteger) field.get(null);
+            }
+            for(Field field : ClientboundAddEntityPacket.class.getDeclaredFields()) if(field.getType().equals(int.class)) {
+                field.setAccessible(true);
+                addEntityIdField = field;
+                break;
             }
         } catch (Exception e) { e.printStackTrace(); }
         ENTITY_COUNTER = new AtomicInteger();
@@ -43,15 +50,24 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
     private final HashMap<String, HashMap<Integer, Pair<Integer, String>>> cache = new HashMap<>();
 
-    private void addHoloRowEntity(GHolo Holo, int CurrentSize) {
+    private void addHoloRowEntity(GHolo Holo, GHoloRow HoloRow, int CurrentSize) {
 
-        double height = GPM.getCManager().SPACE_BETWEEN_LINES * CurrentSize;
+        double height = HoloRow.getHeight() * CurrentSize;
 
         HoloEntity holoEntity = new HoloEntity(Holo.getLocation());
 
         holoEntity.setPos(Holo.getLocation().getX(), Holo.getLocation().getY() - height - 0.08, Holo.getLocation().getZ());
 
         holos.get(Holo).add(holoEntity);
+    }
+
+    private void updateMidLocation(GHolo Holo) {
+
+        double height = 0;
+
+        for(GHoloRow holoRow : Holo.getRows()) height += holoRow.getHeight();
+
+        Holo.setMidLocation(Holo.getLocation().clone().subtract(0, height / 2, 0));
     }
 
     public void registerHolo(GHolo Holo) {
@@ -62,9 +78,14 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
             holos.put(Holo, new ArrayList<>());
 
-            for(int size = 0; size < Holo.getContent().size(); size++) addHoloRowEntity(Holo, size);
+            int size = 0;
 
-            Holo.setMidLocation(Holo.getLocation().clone().subtract(0, (Holo.getContent().size() * GPM.getCManager().SPACE_BETWEEN_LINES) / 2, 0));
+            for(GHoloRow holoRow : Holo.getRows()) {
+                addHoloRowEntity(Holo, holoRow, size);
+                size++;
+            }
+
+            updateMidLocation(Holo);
         } catch (Throwable e) { e.printStackTrace(); }
     }
 
@@ -93,11 +114,12 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
         int holoSize = holos.get(Holo).size();
 
-        if(Holo.getContent().size() == holoSize) return;
+        if(Holo.getRows().size() == holoSize) return;
 
-        if(Holo.getContent().size() > holoSize) {
+        if(Holo.getRows().size() > holoSize) {
 
-            addHoloRowEntity(Holo, holoSize);
+            addHoloRowEntity(Holo, Holo.getRows().get(Holo.getRows().size() - 1), holoSize);
+            updateMidLocation(Holo);
             return;
         }
 
@@ -154,7 +176,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                 for(Entity holoRow : holoEntry.getValue()) {
 
-                    String rowContent = holo.getContent().get(row);
+                    String rowContent = holo.getRows().get(row).getContent();
 
                     int baseId = holoRow.getId();
 
@@ -164,9 +186,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                         if(!player.isOnline()) continue;
 
-                        if(rowContent.chars().filter(ch -> ch == HoloAnimationManager.AMIMATION_CHAR).count() > 1) rowContent = GPM.getFormatUtil().formatPlaceholders(rowContent, player);
-
-                        rowContent = GPM.getFormatUtil().formatSymbols(rowContent);
+                        rowContent = GPM.getFormatUtil().formatSymbols(GPM.getFormatUtil().formatPlaceholders(rowContent, player));
 
                         String playerUUID = player.getUniqueId().toString();
 
@@ -187,11 +207,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
                         if(!cacheHolo.containsKey(baseId)) {
 
                             ClientboundAddEntityPacket spawnPacket = new ClientboundAddEntityPacket(holoRow);
-                            for(Field field : spawnPacket.getClass().getDeclaredFields()) if(field.getType().equals(int.class)) {
-                                field.setAccessible(true);
-                                field.set(spawnPacket, id);
-                                break;
-                            }
+                            addEntityIdField.set(spawnPacket, id);
                             serverPlayer.connection.send(spawnPacket);
                         }
 

@@ -18,8 +18,10 @@ public class FormatUtil {
 
     public String formatPlaceholders(String Text, Player Player) {
         String text = Text;
-        for(Entry<String, GHoloAnimation> animation : GPM.getHoloAnimationManager().getAnimationSet().entrySet()) text = text.replace(HoloAnimationManager.AMIMATION_CHAR + animation.getKey() + HoloAnimationManager.AMIMATION_CHAR, animation.getValue().getCurrentContent());
-        text = GPM.getCManager().L_PLACEHOLDER_API && GPM.getPlaceholderAPILink() ? PlaceholderAPI.setPlaceholders(Player, text) : text;
+        if(text.chars().filter(ch -> ch == HoloAnimationManager.AMIMATION_CHAR).count() > 1) {
+            for(Entry<String, GHoloAnimation> animation : GPM.getHoloAnimationManager().getAnimationSet().entrySet()) text = text.replace(HoloAnimationManager.AMIMATION_CHAR + animation.getKey() + HoloAnimationManager.AMIMATION_CHAR, animation.getValue().getCurrentContent());
+            text = GPM.getCManager().L_PLACEHOLDER_API && GPM.getPlaceholderAPILink() ? PlaceholderAPI.setPlaceholders(Player, text) : text;
+        }
         text = GPM.getMManager().toFormattedMessage(text);
         return text;
     }

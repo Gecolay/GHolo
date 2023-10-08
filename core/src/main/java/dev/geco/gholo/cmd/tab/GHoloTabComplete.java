@@ -61,7 +61,7 @@ public class GHoloTabComplete implements TabCompleter {
                     if(Args[0].equalsIgnoreCase("removerow") || Args[0].equalsIgnoreCase("setrow") || Args[0].equalsIgnoreCase("insertrow")) {
 
                         GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
-                        if(holo != null) for(int row = 1; row <= holo.getContent().size(); row++) complete.add(String.valueOf(row));
+                        if(holo != null) for(int row = 1; row <= holo.getRows().size(); row++) complete.add(String.valueOf(row));
                     }
                     if(Args[0].equalsIgnoreCase("copy")) for(GHolo holo : GPM.getHoloManager().getHolos()) complete.add(holo.getId());
                     if(Args[0].equalsIgnoreCase("align")) {

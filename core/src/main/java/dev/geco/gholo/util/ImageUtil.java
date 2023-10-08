@@ -9,6 +9,7 @@ import java.util.*;
 import javax.imageio.*;
 
 import dev.geco.gholo.GHoloMain;
+import dev.geco.gholo.objects.*;
 
 public class ImageUtil {
 
@@ -51,6 +52,15 @@ public class ImageUtil {
     private final String[] lines;
 
     public List<String> getLines() { return new ArrayList<>(Arrays.asList(lines)); }
+
+    public List<GHoloRow> toHoloRows() {
+
+        List<GHoloRow> holoRows = new ArrayList<>();
+        for(String line : lines) holoRows.add(new GHoloRow(line));
+        return holoRows;
+    }
+
+    public static void generateFolder() { if(!IMAGE_FOLDER.exists()) IMAGE_FOLDER.mkdir(); }
 
     public static BufferedImage getBufferedImage(String URL) { try { return ImageIO.read(new URL(URL)); } catch (Exception e) { return null; } }
 
