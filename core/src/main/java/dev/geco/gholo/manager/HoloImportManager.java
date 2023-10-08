@@ -98,7 +98,7 @@ public class HoloImportManager {
 
             if(!fileContent.getBoolean("enabled", false)) continue;
 
-            int range = fileContent.getInt("display-range", 64);
+            int range = fileContent.getInt("display-range", HoloManager.MAX_HOLO_RANGE);
 
             String[] args = fileContent.getString("location", "").split(":");
 

@@ -133,7 +133,7 @@ public class GHoloCommand implements CommandExecutor {
                             e = new StringBuilder(e.substring(0, e.length() - 1));
                             GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
                             holo.addContent(e.toString());
-                            GPM.getHoloManager().saveHolo(holo);
+                            GPM.getHoloManager().updateHolo(holo);
                         } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-addrow-exists-error", "%Holo%", Args[1].toLowerCase());
                     } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-addrow-use-error");
                     break;
@@ -145,7 +145,7 @@ public class GHoloCommand implements CommandExecutor {
                                 if(r > 0 && GPM.getHoloManager().getHolo(Args[1]).getContent().size() >= r) {
                                     GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
                                     holo.removeContent(r);
-                                    GPM.getHoloManager().saveHolo(holo);
+                                    GPM.getHoloManager().updateHolo(holo);
                                 } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-removerow-row-exists-error", "%Row%", Args[2].toLowerCase());
                             } catch (NumberFormatException e) {
                                 GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-removerow-row-exists-error", "%Row%", Args[2].toLowerCase());
@@ -164,7 +164,7 @@ public class GHoloCommand implements CommandExecutor {
                                     e = new StringBuilder(e.substring(0, e.length() - 1));
                                     GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
                                     holo.setContent(r, e.toString());
-                                    GPM.getHoloManager().saveHolo(holo);
+                                    GPM.getHoloManager().updateHolo(holo);
                                 } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-setrow-row-exists-error", "%Row%", Args[2].toLowerCase());
                             } catch (NumberFormatException e) {
                                 GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-setrow-row-exists-error", "%Row%", Args[2].toLowerCase());
@@ -183,7 +183,7 @@ public class GHoloCommand implements CommandExecutor {
                                     e = new StringBuilder(e.substring(0, e.length() - 1));
                                     GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
                                     holo.insertContent(r, e.toString());
-                                    GPM.getHoloManager().saveHolo(holo);
+                                    GPM.getHoloManager().updateHolo(holo);
                                 } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-insertrow-row-exists-error", "%Row%", Args[2].toLowerCase());
                             } catch (NumberFormatException e) {
                                 GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-insertrow-row-exists-error", "%Row%", Args[2].toLowerCase());
@@ -198,7 +198,7 @@ public class GHoloCommand implements CommandExecutor {
                                 GHolo holoCopyFrom = GPM.getHoloManager().getHolo(Args[1]);
                                 GHolo holoCopyTo = GPM.getHoloManager().getHolo(Args[2]);
                                 holoCopyTo.setContent(holoCopyFrom.getContent());
-                                GPM.getHoloManager().saveHolo(holoCopyTo);
+                                GPM.getHoloManager().updateHolo(holoCopyTo);
                                 GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-copy", "%Holo%", Args[1].toLowerCase());
                             } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-copy-exists-error", "%Holo%", Args[2].toLowerCase());
                         } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-copy-exists-error", "%Holo%", Args[1].toLowerCase());
@@ -209,10 +209,10 @@ public class GHoloCommand implements CommandExecutor {
                         if(GPM.getHoloManager().existsHolo(Args[1])) {
                             try {
                                 int r = Integer.parseInt(Args[2]);
-                                if(r >= -1 && r <= 64) {
+                                if(r >= -1 && r <= HoloManager.MAX_HOLO_RANGE) {
                                     GHolo holo = GPM.getHoloManager().getHolo(Args[1]);
                                     holo.setRange(r);
-                                    GPM.getHoloManager().saveHolo(holo);
+                                    GPM.getHoloManager().updateHolo(holo);
                                     GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-range", "%Holo%", Args[1].toLowerCase(), "%Range%", Args[2].toLowerCase());
                                 } else GPM.getMManager().sendMessage(Sender, "Messages.command-gholo-range-range-error", "%Range%", Args[2].toLowerCase());
                             } catch (NumberFormatException e) {

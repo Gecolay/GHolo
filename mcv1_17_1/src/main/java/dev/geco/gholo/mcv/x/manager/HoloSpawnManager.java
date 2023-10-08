@@ -1,15 +1,21 @@
 package dev.geco.gholo.mcv.x.manager;
 
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.Map.*;
+import java.util.concurrent.atomic.*;
+
+import com.mojang.datafixers.util.*;
 
 import org.bukkit.*;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.ints.*;
 import org.bukkit.craftbukkit.v1_17_R1.entity.*;
 import org.bukkit.craftbukkit.v1_17_R1.util.*;
 import org.bukkit.entity.*;
 
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.*;
+import net.minecraft.world.entity.Entity;
 
 import dev.geco.gholo.GHoloMain;
 import dev.geco.gholo.manager.*;
@@ -20,11 +26,33 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
     private final GHoloMain GPM;
 
-    public HoloSpawnManager(GHoloMain GHoloMain) { GPM = GHoloMain; }
+    private static AtomicInteger ENTITY_COUNTER;
 
-    private final HashMap<GHolo, List<GHoloRow>> holos = new HashMap<>();
+    public HoloSpawnManager(GHoloMain GHoloMain) {
+        GPM = GHoloMain;
+        try {
+            for(Field field : Entity.class.getDeclaredFields()) if(field.getType().equals(AtomicInteger.class)) {
+                field.setAccessible(true);
+                ENTITY_COUNTER = (AtomicInteger) field.get(null);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        ENTITY_COUNTER = new AtomicInteger();
+    }
 
-    private final HashMap<UUID, HashMap<Integer, String>> cache = new HashMap<>();
+    private final HashMap<GHolo, List<Entity>> holos = new HashMap<>();
+
+    private final HashMap<String, HashMap<Integer, Pair<Integer, String>>> cache = new HashMap<>();
+
+    private void addHoloRowEntity(GHolo Holo, int CurrentSize) {
+
+        double height = GPM.getCManager().SPACE_BETWEEN_LINES * CurrentSize;
+
+        HoloEntity holoEntity = new HoloEntity(Holo.getLocation());
+
+        holoEntity.setPos(Holo.getLocation().getX(), Holo.getLocation().getY() - height - 0.08, Holo.getLocation().getZ());
+
+        holos.get(Holo).add(holoEntity);
+    }
 
     public void registerHolo(GHolo Holo) {
 
@@ -32,90 +60,103 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
         try {
 
-            List<GHoloRow> holoRows = new ArrayList<>();
+            holos.put(Holo, new ArrayList<>());
 
-            double height = 0;
+            for(int size = 0; size < Holo.getContent().size(); size++) addHoloRowEntity(Holo, size);
 
-            for(String content : Holo.getContent()) {
-
-                boolean containsPlaceholder = content.chars().filter(ch -> ch == '%').count() > 1;
-
-                HoloEntity holoEntity = new HoloEntity(Holo.getLocation());
-
-                holoEntity.setPos(Holo.getLocation().getX(), Holo.getLocation().getY() - height - 0.08, Holo.getLocation().getZ());
-
-                holoRows.add(new GHoloRow(containsPlaceholder, holoEntity));
-
-                height += GPM.getCManager().SPACE_BETWEEN_LINES;
-            }
-
-            Holo.setMidLocation(Holo.getLocation().clone().subtract(0, height / 2, 0));
-
-            Holo.clearUUIDs();
-
-            holos.put(Holo, holoRows);
+            Holo.setMidLocation(Holo.getLocation().clone().subtract(0, (Holo.getContent().size() * GPM.getCManager().SPACE_BETWEEN_LINES) / 2, 0));
         } catch (Throwable e) { e.printStackTrace(); }
     }
 
-    public void unregisterHolo(GHolo Holo) {
+    private void removeForPlayer(Player Player, List<Entity> Entities) {
 
-        unregisterHolo(Holo, true);
-        cache.clear();
+        if(!Player.isOnline()) return;
+
+        String playerUUID = Player.getUniqueId().toString();
+
+        if(!cache.containsKey(playerUUID)) return;
+
+        IntList intList = new IntArrayList();
+
+        for(Entity holoRow : Entities) {
+
+            intList.add(cache.get(playerUUID).get(holoRow.getId()).getFirst().intValue());
+            cache.get(playerUUID).remove(holoRow.getId());
+        }
+
+        ClientboundRemoveEntitiesPacket removeEntitiesPacket = new ClientboundRemoveEntitiesPacket(intList);
+
+        ((CraftPlayer) Player).getHandle().connection.send(removeEntitiesPacket);
     }
+
+    public void updateHolo(GHolo Holo) {
+
+        int holoSize = holos.get(Holo).size();
+
+        if(Holo.getContent().size() == holoSize) return;
+
+        if(Holo.getContent().size() > holoSize) {
+
+            addHoloRowEntity(Holo, holoSize);
+            return;
+        }
+
+        List<Entity> entities = Collections.singletonList(holos.get(Holo).get(holoSize - 1));
+        for(Player player : Holo.getPlayers()) removeForPlayer(player, entities);
+
+        holos.get(Holo).remove(holoSize - 1);
+    }
+
+    public void unregisterHolo(GHolo Holo) { unregisterHolo(Holo, true); }
 
     public void unregisterHolo(GHolo Holo, boolean Remove) {
 
         if(!holos.containsKey(Holo)) return;
 
-        for(GHoloRow holoRow : holos.get(Holo)) {
+        for(Player player : Holo.getPlayers()) removeForPlayer(player, holos.get(Holo));
 
-            ClientboundRemoveEntitiesPacket removeEntitiesPacket = new ClientboundRemoveEntitiesPacket(holoRow.getBase().getId());
-
-            for(UUID uuid : Holo.getUUIDs()) {
-
-                Player player = Bukkit.getPlayer(uuid);
-
-                if(player != null && player.isOnline()) ((CraftPlayer) player).getHandle().connection.send(removeEntitiesPacket);
-            }
-        }
+        Holo.clearPlayers();
 
         if(Remove) holos.remove(Holo);
     }
 
     private Set<Player> getNearPlayers(Location Location, double Range) {
         Set<Player> players = new HashSet<>();
-        Location.getWorld().getPlayers().stream().filter(player -> Location.distance(player.getLocation()) <= Range).forEach(players::add);
+        Objects.requireNonNull(Location.getWorld()).getPlayers().stream().filter(player -> Location.distance(player.getLocation()) <= Range).forEach(players::add);
         return players;
     }
+
+    public void clearPlayerCache(Player Player) { cache.remove(Player.getUniqueId().toString()); }
 
     public void spawn() {
 
         try {
 
-            for(Entry<GHolo, List<GHoloRow>> holoEntry : holos.entrySet()) {
+            Iterator<Entry<GHolo, List<Entity>>> holoIterator = holos.entrySet().iterator();
+
+            while(holoIterator.hasNext()) {
+
+                Entry<GHolo, List<Entity>> holoEntry = holoIterator.next();
 
                 GHolo holo = holoEntry.getKey();
 
                 if(holo.getRange() == 0) continue;
 
-                int range = holo.getRange() < 0 ? 64 : holo.getRange();
+                int range = holo.getRange() < 0 ? HoloManager.MAX_HOLO_RANGE : holo.getRange();
 
                 Set<Player> players = getNearPlayers(holo.getMidLocation(), range);
 
                 List<Player> despawnPlayers = new ArrayList<>();
 
-                for(UUID uuid : holo.getUUIDs()) {
-
-                    Player player = Bukkit.getPlayer(uuid);
-
-                    if(player != null && !players.contains(player)) despawnPlayers.add(player);
-                }
+                for(Player player : holo.getPlayers()) if(!players.contains(player)) despawnPlayers.add(player);
 
                 int row = 0;
 
-                for(GHoloRow holoRow : holoEntry.getValue()) {
+                for(Entity holoRow : holoEntry.getValue()) {
 
                     String rowContent = holo.getContent().get(row);
+
+                    int baseId = holoRow.getId();
 
                     row++;
 
@@ -123,40 +164,48 @@ public class HoloSpawnManager implements IHoloSpawnManager {
 
                         if(!player.isOnline()) continue;
 
-                        if(holoRow.needUpdate()) rowContent = GPM.getFormatUtil().formatPlaceholders(rowContent, player);
+                        if(rowContent.chars().filter(ch -> ch == HoloAnimationManager.AMIMATION_CHAR).count() > 1) rowContent = GPM.getFormatUtil().formatPlaceholders(rowContent, player);
 
-                        UUID uuid = player.getUniqueId();
+                        rowContent = GPM.getFormatUtil().formatSymbols(rowContent);
 
-                        if(cache.containsKey(uuid) && rowContent.equals(cache.get(uuid).get(holoRow.getBase().getId()))) continue;
+                        String playerUUID = player.getUniqueId().toString();
+
+                        if(!cache.containsKey(playerUUID)) cache.put(playerUUID, new HashMap<>());
+
+                        HashMap<Integer, Pair<Integer, String>> cacheHolo = cache.get(playerUUID);
+
+                        if(cacheHolo.containsKey(baseId) && rowContent.equals(cacheHolo.get(baseId).getSecond())) continue;
 
                         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
 
-                        holoRow.getBase().setCustomNameVisible(!rowContent.equalsIgnoreCase("[]"));
+                        holoRow.setCustomNameVisible(!rowContent.equalsIgnoreCase(HoloManager.EMPTY_STRING));
 
-                        try { holoRow.getBase().setCustomName(CraftChatMessage.fromString(rowContent)[0]); } catch (Exception e) { e.printStackTrace(); }
+                        try { holoRow.setCustomName(CraftChatMessage.fromString(rowContent)[0]); } catch (Exception e) { e.printStackTrace(); }
 
-                        if(!holo.getUUIDs().contains(player.getUniqueId())) serverPlayer.connection.send(new ClientboundAddEntityPacket(holoRow.getBase()));
+                        int id = cacheHolo.containsKey(baseId) ? cacheHolo.get(baseId).getFirst() : ENTITY_COUNTER.incrementAndGet();
 
-                        serverPlayer.connection.send(new ClientboundSetEntityDataPacket(holoRow.getBase().getId(), holoRow.getBase().getEntityData(), true));
+                        if(!cacheHolo.containsKey(baseId)) {
 
-                        HashMap<Integer, String> playerCache = cache.getOrDefault(uuid, new HashMap<>());
+                            ClientboundAddEntityPacket spawnPacket = new ClientboundAddEntityPacket(holoRow);
+                            for(Field field : spawnPacket.getClass().getDeclaredFields()) if(field.getType().equals(int.class)) {
+                                field.setAccessible(true);
+                                field.set(spawnPacket, id);
+                                break;
+                            }
+                            serverPlayer.connection.send(spawnPacket);
+                        }
 
-                        playerCache.put(holoRow.getBase().getId(), rowContent);
+                        serverPlayer.connection.send(new ClientboundSetEntityDataPacket(holoRow.getId(), holoRow.getEntityData(), true));
 
-                        cache.put(uuid, playerCache);
-                    }
+                        cacheHolo.put(baseId, new Pair<>(id, rowContent));
 
-                    if(despawnPlayers.size() > 0) {
-
-                        ClientboundRemoveEntitiesPacket removeEntitiesPacket = new ClientboundRemoveEntitiesPacket(holoRow.getBase().getId());
-
-                        for(Player despawnPlayer : despawnPlayers) ((CraftPlayer) despawnPlayer).getHandle().connection.send(removeEntitiesPacket);
+                        cache.put(playerUUID, cacheHolo);
                     }
                 }
 
-                holo.clearUUIDs();
+                if(despawnPlayers.size() > 0) for(Player despawnPlayer : despawnPlayers) removeForPlayer(despawnPlayer, holoEntry.getValue());
 
-                for(Player player : players) holo.addUUID(player.getUniqueId());
+                holo.setPlayers(new ArrayList<>(players));
             }
         } catch (Throwable e) { e.printStackTrace(); }
     }

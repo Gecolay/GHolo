@@ -14,6 +14,8 @@ public class HoloAnimationManager {
 
     public HoloAnimationManager(GHoloMain GPluginMain) { GPM = GPluginMain; }
 
+    public static final char AMIMATION_CHAR = '%';
+
     private final HashMap<String, GHoloAnimation> animations = new HashMap<>();
 
     private UUID taskId;

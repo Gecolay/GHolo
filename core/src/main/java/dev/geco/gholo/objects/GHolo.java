@@ -3,6 +3,9 @@ package dev.geco.gholo.objects;
 import java.util.*;
 
 import org.bukkit.*;
+import org.bukkit.entity.*;
+
+import dev.geco.gholo.manager.*;
 
 public class GHolo {
 
@@ -14,7 +17,7 @@ public class GHolo {
 
     private List<String> content;
 
-    private final List<UUID> uuids = new ArrayList<>();
+    private List<Player> players = new ArrayList<>();
 
     private int range;
 
@@ -25,7 +28,7 @@ public class GHolo {
         id = Id;
         location = Location.clone();
         content = new ArrayList<>(Content);
-        range = Range;
+        setRange(Range);
     }
 
     public String getId() { return id; }
@@ -50,16 +53,18 @@ public class GHolo {
 
     public void insertContent(int Row, String Content) { content.add(Row - 1, Content); }
 
-    public List<UUID> getUUIDs() { return uuids; }
+    public List<Player> getPlayers() { return players; }
 
-    public void addUUID(UUID U) { uuids.add(U); }
+    public void setPlayers(List<Player> Players) { players = Players; }
 
-    public void removeUUID(UUID U) { uuids.remove(U); }
+    public void addPlayer(Player Player) { players.add(Player); }
 
-    public void clearUUIDs() { uuids.clear(); }
+    public void removePlayer(Player Player) { players.remove(Player); }
+
+    public void clearPlayers() { players.clear(); }
 
     public int getRange() { return range; }
 
-    public void setRange(int R) { range = R < 0 ? -1 : Math.min(R, 64); }
+    public void setRange(int Range) { range = Range < 0 ? -1 : Math.min(Range, HoloManager.MAX_HOLO_RANGE); }
 
 }
