@@ -212,7 +212,7 @@ public class HoloSpawnManager implements IHoloSpawnManager {
                             serverPlayer.connection.send(spawnPacket);
                         }
 
-                        serverPlayer.connection.send(new ClientboundSetEntityDataPacket(id, holoRow.getEntityData().isDirty() ? holoRow.getEntityData().packDirty() : holoRow.getEntityData().getNonDefaultValues()));
+                        serverPlayer.connection.send(new ClientboundSetEntityDataPacket(id, holoRow.getEntityData().getNonDefaultValues()));
 
                         cacheHolo.put(baseId, new Pair<>(id, rowContent));
 
