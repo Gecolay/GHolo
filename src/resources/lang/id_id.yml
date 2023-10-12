@@ -1,0 +1,113 @@
+#
+# Language-File created by:   DustyGanteng
+#
+
+
+
+Plugin:
+
+  plugin-enabled: "[P]&a Plugin berhasil diaktifkan."
+  plugin-link: "[P]&a Berhasil menautkan&6 %Link%&a!"
+  plugin-update: "[P]&a Tersedia versi baru:&6 %NewVersion%&a!\n[P]&a Versi saat ini:&6 %Version%&a!\n[P]&a Unduh versi terbaru:\n[P]&6 %Path%"
+  plugin-data: "[P]&c Sambungan ke penyimpanan data tidak dapat dibuat. Mohon cek konsol server!"
+  plugin-version: "[P]&c Plugin tidak bisa digunakan dengan versi server ini! (&b%Version%&c)"
+  plugin-reload: "[P]&a Plugin berhasil dimuat ulang."
+  plugin-disabled: "[P]&a Plugin berhasil dinonaktifkan."
+  plugin-prefix: "&7[&6GHolo&7]"
+
+
+
+Messages:
+
+  command-permission-error: "[P]&c Kamu tidak punya izin untuk menggunakan perintah ini!"
+  command-sender-error: "[P]&c Kamu tidak bisa menjalankan perintah ini!"
+
+  command-gholo-use-error: "[P]&c Perintah: /holo help"
+  command-gholo-create-use-error: "[P]&c Perintah: /holo create <Id>"
+  command-gholo-create-exists-error: "[P]&c Holo&6 %Holo%&c sudah ada!"
+  command-gholo-create: "[P]&a Holo&6 %Holo%&a berhasil dibuat."
+  command-gholo-info-use-error: "[P]&c Perintah: /holo info <Id>"
+  command-gholo-info-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-remove-use-error: "[P]&c Perintah: /holo remove <Id>"
+  command-gholo-remove-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-remove: "[P]&a Holo&6 %Holo%&a berhasil dihapus."
+  command-gholo-tp-use-error: "[P]&c Perintah: /holo tp <Id>"
+  command-gholo-tp-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-tphere-use-error: "[P]&c Perintah: /holo tphere <Id>"
+  command-gholo-tphere-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-tpto-use-error: "[P]&c Perintah: /holo tpto <Id> <X> <Y> <Z>"
+  command-gholo-tpto-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-tpto-location-error: "[P]&c Lokasi tidak valid!"
+  command-gholo-addrow-use-error: "[P]&c Perintah: /holo addrow <Id> <Teks>"
+  command-gholo-addrow-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-removerow-use-error: "[P]&c Perintah: /holo removerow <Id> <Baris>"
+  command-gholo-removerow-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-removerow-row-exists-error: "[P]&c Baris&b %Row%&c tidak ada!"
+  command-gholo-setrow-use-error: "[P]&c Perintah: /holo setrow <Id> <Baris> <Teks>"
+  command-gholo-setrow-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-setrow-row-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-insertrow-use-error: "[P]&c Perintah: /holo insertrow <Id> <Baris> <Teks>"
+  command-gholo-insertrow-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-insertrow-row-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-copy-use-error: "[P]&c Perintah: /holo copy <Id> <Id>"
+  command-gholo-copy-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-copy: "[P]&a Holo&6 %Holo%&a berhasil disalin."
+  command-gholo-range-use-error: "[P]&c Perintah: /holo range <Id> <Jangkauan>"
+  command-gholo-range-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-range-range-error: "[P]&c Jangkauan&b %Range%&c tidak valid!"
+  command-gholo-range: "[P]&a Jangkauan untuk Holo&6 %Holo%&a diatur menjadi&b %Range%&a."
+  command-gholo-align-use-error: "[P]&c Perintah: /holo align <Id> x/y/z/xz <Id>"
+  command-gholo-align-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-align-axis-error: "[P]&c Poros&6 %Axis%&c tidak ada!"
+  command-gholo-condition-use-error: "[P]&c Perintah: /holo condition <Id> [<Kondisi>]"
+  command-gholo-condition-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-condition-removed: "[P]&a Kondisi untuk Holo&6 %Holo%&a telah dihapus."
+  command-gholo-condition-valid-error: "[P]&c Kondisi&6 %Condition%&c tidak valid!"
+  command-gholo-condition: "[P]&a Kondisi untuk Holo&6 %Holo%&a diatur menjadi&6 %Condition%&a."
+  command-gholo-image-use-error: "[P]&c Perintah: /holo image <Id> avatar/helm/file/url <Nilai> [<Ukuran>]"
+  command-gholo-image-exists-error: "[P]&c Holo&6 %Holo%&c tidak ada!"
+  command-gholo-image-avatar-error: "[P]&c Avatar-Gambar&6 %Avatar%&c tidak bisa digunakan!"
+  command-gholo-image-avatar: "[P]&a Avatar-Gambar&6 %Avatar%&a berhasil diatur."
+  command-gholo-image-helm-error: "[P]&c Helm-Gambar&6 %Helm%&c tidak bisa digunakan!"
+  command-gholo-image-helm: "[P]&a Helm-Gambar&6 %Helm%&a berhasil diatur."
+  command-gholo-image-file-exists-error: "[P]&c Berkas-Gambar&6 %File%&c tidak ada!"
+  command-gholo-image-file-error: "[P]&c Berkas-Gambar&6 %File%&c tidak bisa digunakan!"
+  command-gholo-image-file: "[P]&a Berkas-Gambar&6 %File%&a berhasil diatur."
+  command-gholo-image-url-error: "[P]&c URL-Gambar&6 %URL%&c tidak bisa digunakan!"
+  command-gholo-image-url: "[P]&a URL-Gambar&6 %URL%&a berhasil diatur."
+  command-gholo-import-use-error: "[P]&c Perintah: /holo import <Plugin>"
+  command-gholo-import-plugin-use-error: "[P]&c Plugin&6 %Plugin%&c tidak bisa diimpor!"
+  command-gholo-import-plugin-import-error: "[P]&c Tidak ada Holo yang diimpor dari Plugin&6 %Plugin%&c!"
+  command-gholo-import-plugin: "[P]&a Holo dari Plugin&6 %Plugin%&a berhasil diimpor."
+
+
+
+GHoloHelp:
+
+  header: "&7------------ [&6Holo&7] ------------"
+  help: "&b/holo help&7 ->&6 Daftar Bantuan"
+  create: "&b/holo create <Id>&7 ->&6 Buat Holo"
+  info: "&b/holo info <Id>&7 ->&6 Tampilkan Konten-Holo"
+  remove: "&b/holo remove <Id>&7 ->&6 Hapus Holo"
+  tp: "&b/holo tp <Id>&7 ->&6 Pindah ke Holo"
+  tphere: "&b/holo tphere <Id>&7 ->&6 Memindahkan Holo ke Lokasimu"
+  tpto: "&b/holo tpto <Id> <X> <Y> <Z>&7 ->&6 Memindahkan Holo ke sebuah Lokasi"
+  addrow: "&b/holo addrow <Id> <Teks>&7 ->&6 Menambah Baris-Holo"
+  removerow: "&b/holo removerow <Id> <Baris>&7 ->&6 Hapus Baris-Holo"
+  setrow: "&b/holo setrow <Id> <Baris> <Teks>&7 ->&6 Atur Baris-Holo"
+  insertrow: "&b/holo insertrow <Id> <Baris> <Teks>&7 ->&6 Menyisipkan Baris-Holo"
+  copy: "&b/holo copy <Id> <Id>&7 ->&6 Salin Konten-Holo"
+  range: "&b/holo range <Id> <Range>&7 ->&6 Atur Jangkauan Holo"
+  align: "&b/holo align <Id> x/y/z/xz <Id>&7 ->&6 Sejajarkan Holo"
+  condition: "&b/holo condition <Id> [<Kondisi>]&7 ->&6 Atur Kondisi-Tampilan untuk Holo"
+  image: "&b/holo image <Id> avatar/helm/file/url <Nilai> [<Ukuran>]&7 ->&6 Atur Konten-Holo dengan Gambar"
+  import: "&b/holo import <Plugin>&7 ->&6 Impor Holo dari Plugin lain"
+  footer: "&7------------------------------"
+
+
+
+GHoloInfo:
+
+  header: "&7------------ [&6Holo&7] ------------"
+  row: "&b%Row%&7.&r %Content%"
+  footer: "&7------------------------------"
